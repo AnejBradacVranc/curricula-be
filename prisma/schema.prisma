@@ -14,3 +14,18 @@ datasource db {
   provider = "postgresql"
 }
 
+model School {
+  id    Int     @default(autoincrement()) @id
+  name String  @unique
+  users User[]
+}
+
+model User {
+  id    Int     @default(autoincrement()) @id
+  email String  @unique
+  name  String?
+  surname String?
+  school School? @relation(fields: [schoolId], references: [id])
+  schoolId Int?
+  role String
+}
