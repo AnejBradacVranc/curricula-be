@@ -1,0 +1,46 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "npx prisma migrate deploy && npm run start:dev"
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-curricula}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-curricula}
+      POSTGRES_DB: ${POSTGRES_DB:-curricula}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
