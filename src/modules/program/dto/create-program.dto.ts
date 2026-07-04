@@ -1,7 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateProgramDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
   @Type(() => Number)
   @IsInt()
   schoolId: number;

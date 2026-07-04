@@ -12,10 +12,10 @@ export class ProgramsService {
   }
 
   async createProgram(data: CreateProgramDto): Promise<Program> {
-    const { schoolId, availableHours } = data;
+    const { schoolId, ...rest } = data;
     return this.prisma.program.create({
       data: {
-        availableHours,
+        ...rest,
         school: { connect: { id: schoolId } },
       },
     });
