@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional } from 'class-validator';
+import { IsInt } from 'class-validator';
 
 export class CreateAssignmentDto {
   @Type(() => Number)
@@ -10,8 +10,8 @@ export class CreateAssignmentDto {
   @IsInt()
   teacherId: number;
 
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  assignedHours?: number;
+  //@IsOptional()
+  //@Type(() => Number)
+  //@IsInt()
+  //assignedHours?: number;
 }

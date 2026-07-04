@@ -3,16 +3,27 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { SubjectTeacher } from 'generated/prisma/client';
+import { Prisma, SubjectTeacher } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
+
+const assignmentInclude = {
+  subject: { omit: { schoolId: true } },
+  teacher: { omit: { schoolId: true } },
+} as const satisfies Prisma.SubjectTeacherInclude;
+
+export type AssignmentWithRelations = Prisma.SubjectTeacherGetPayload<{
+  include: typeof assignmentInclude;
+}>;
 
 @Injectable()
 export class AssignmentsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async assignments(): Promise<SubjectTeacher[]> {
-    return this.prisma.subjectTeacher.findMany();
+  async assignments(): Promise<AssignmentWithRelations[]> {
+    return this.prisma.subjectTeacher.findMany({
+      include: assignmentInclude,
+    });
   }
 
   async createAssignment(data: CreateAssignmentDto): Promise<SubjectTeacher> {

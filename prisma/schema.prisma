@@ -92,7 +92,7 @@ model SubjectTeacher {
   subject       Subject @relation(fields: [subjectId], references: [id])
   subjectId     Int
   teacherId     Int
-  assignedHours Int?
+  //assignedHours Int?
 
   @@id([subjectId, teacherId])
 
