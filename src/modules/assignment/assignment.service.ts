@@ -20,13 +20,19 @@ export type AssignmentWithRelations = Prisma.SubjectTeacherGetPayload<{
 export class AssignmentsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async assignments(): Promise<AssignmentWithRelations[]> {
+  async assignmentsBySchool(
+    schoolId: number,
+  ): Promise<AssignmentWithRelations[]> {
     return this.prisma.subjectTeacher.findMany({
+      where: { subject: { schoolId } },
       include: assignmentInclude,
     });
   }
 
-  async createAssignment(data: CreateAssignmentDto): Promise<SubjectTeacher> {
+  async createAssignment(
+    schoolId: number,
+    data: CreateAssignmentDto,
+  ): Promise<SubjectTeacher> {
     const { subjectId, teacherId, ...rest } = data;
 
     const [subject, teacher] = await Promise.all([
@@ -36,6 +42,12 @@ export class AssignmentsService {
 
     if (!subject || !teacher) {
       throw new NotFoundException('Subject or teacher not found');
+    }
+
+    if (subject.schoolId !== schoolId || teacher.schoolId !== schoolId) {
+      throw new BadRequestException(
+        'Subject and teacher must belong to this school',
+      );
     }
 
     if (subject.schoolId !== teacher.schoolId) {

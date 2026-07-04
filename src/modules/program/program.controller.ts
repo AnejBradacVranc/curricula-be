@@ -1,21 +1,24 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { Program } from 'generated/prisma/client';
 import { CreateProgramDto } from './dto/create-program.dto';
-import { ProgramsService } from './program.service';
+import { ProgramsService, ProgramWithRelations } from './program.service';
 
-@Controller('programs')
+@Controller()
 export class ProgramsController {
   constructor(private readonly programsService: ProgramsService) {}
 
   @Get()
-  async getPrograms(): Promise<Program[] | null> {
-    return this.programsService.programs();
+  async getPrograms(
+    @Param('schoolId', ParseIntPipe) schoolId: number,
+  ): Promise<ProgramWithRelations[]> {
+    return this.programsService.programsBySchool(schoolId);
   }
 
   @Post()
   async createProgram(
+    @Param('schoolId', ParseIntPipe) schoolId: number,
     @Body() createProgramDto: CreateProgramDto,
   ): Promise<Program> {
-    return this.programsService.createProgram(createProgramDto);
+    return this.programsService.createProgram(schoolId, createProgramDto);
   }
 }

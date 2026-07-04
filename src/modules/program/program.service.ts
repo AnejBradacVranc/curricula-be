@@ -7,7 +7,7 @@ const programInclude = {
   programSubjects: {
     omit: { programId: true },
     include: {
-      subject: true,
+      subject: { omit: { schoolId: true } },
     },
   },
 } as const satisfies Prisma.ProgramInclude;
@@ -20,17 +20,20 @@ export type ProgramWithRelations = Prisma.ProgramGetPayload<{
 export class ProgramsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async programs(): Promise<Program[] | null> {
+  async programsBySchool(schoolId: number): Promise<ProgramWithRelations[]> {
     return this.prisma.program.findMany({
+      where: { schoolId },
       include: programInclude,
     });
   }
 
-  async createProgram(data: CreateProgramDto): Promise<Program> {
-    const { schoolId, ...rest } = data;
+  async createProgram(
+    schoolId: number,
+    data: CreateProgramDto,
+  ): Promise<Program> {
     return this.prisma.program.create({
       data: {
-        ...rest,
+        ...data,
         school: { connect: { id: schoolId } },
       },
     });

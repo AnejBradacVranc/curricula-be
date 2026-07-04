@@ -20,13 +20,17 @@ export type ProgramSubjectWithRelations = Prisma.ProgramSubjectGetPayload<{
 export class ProgramSubjectsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async programSubjects(): Promise<ProgramSubjectWithRelations[]> {
+  async programSubjectsBySchool(
+    schoolId: number,
+  ): Promise<ProgramSubjectWithRelations[]> {
     return this.prisma.programSubject.findMany({
+      where: { program: { schoolId } },
       include: programSubjectInclude,
     });
   }
 
   async createProgramSubject(
+    schoolId: number,
     data: CreateProgramSubjectDto,
   ): Promise<ProgramSubject> {
     const { programId, subjectId, requiredHours } = data;
@@ -38,6 +42,12 @@ export class ProgramSubjectsService {
 
     if (!program || !subject) {
       throw new NotFoundException('Program or subject not found');
+    }
+
+    if (program.schoolId !== schoolId || subject.schoolId !== schoolId) {
+      throw new BadRequestException(
+        'Program and subject must belong to this school',
+      );
     }
 
     if (program.schoolId !== subject.schoolId) {

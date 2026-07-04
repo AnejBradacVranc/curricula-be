@@ -24,6 +24,13 @@ export class SchoolsService {
     });
   }
 
+  async school(schoolId: number): Promise<SchoolWithRelations | null> {
+    return this.prisma.school.findUnique({
+      where: { id: schoolId },
+      include: schoolInclude,
+    });
+  }
+
   async createSchool(data: CreateSchoolDto): Promise<School> {
     return this.prisma.school.create({ data });
   }

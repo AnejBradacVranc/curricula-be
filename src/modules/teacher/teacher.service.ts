@@ -7,15 +7,19 @@ import { CreateTeacherDto } from './dto/create-teacher.dto';
 export class TeachersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async teachers(): Promise<Teacher[] | null> {
-    return this.prisma.teacher.findMany();
+  async teachersBySchool(schoolId: number): Promise<Teacher[]> {
+    return this.prisma.teacher.findMany({
+      where: { schoolId },
+    });
   }
 
-  async createTeacher(data: CreateTeacherDto): Promise<Teacher> {
-    const { schoolId, ...rest } = data;
+  async createTeacher(
+    schoolId: number,
+    data: CreateTeacherDto,
+  ): Promise<Teacher> {
     return this.prisma.teacher.create({
       data: {
-        ...rest,
+        ...data,
         school: { connect: { id: schoolId } },
       },
     });

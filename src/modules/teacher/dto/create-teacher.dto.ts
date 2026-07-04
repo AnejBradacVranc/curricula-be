@@ -1,5 +1,4 @@
-import { Type } from 'class-transformer';
-import { IsEmail, IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateTeacherDto {
   @IsString()
@@ -13,8 +12,4 @@ export class CreateTeacherDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
-
-  @Type(() => Number)
-  @IsInt()
-  schoolId: number;
 }
