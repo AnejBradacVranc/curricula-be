@@ -12,10 +12,10 @@ export class AssignmentsService {
   }
 
   async createAssignment(data: CreateAssignmentDto): Promise<SubjectTeacher> {
-    const { subjectId, teacherId, assignedHours } = data;
+    const { subjectId, teacherId, ...rest } = data;
     return this.prisma.subjectTeacher.create({
       data: {
-        assignedHours,
+        ...rest,
         subject: { connect: { id: subjectId } },
         teacher: { connect: { id: teacherId } },
       },

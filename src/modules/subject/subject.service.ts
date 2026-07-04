@@ -12,11 +12,10 @@ export class SubjectsService {
   }
 
   async createSubject(data: CreateSubjectDto): Promise<Subject> {
-    const { programId, name, requiredHours } = data;
+    const { programId, ...rest } = data;
     return this.prisma.subject.create({
       data: {
-        name,
-        requiredHours,
+        ...rest,
         program: { connect: { id: programId } },
       },
     });
