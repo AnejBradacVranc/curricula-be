@@ -25,6 +25,9 @@ model School {
   users User[]
   programs Program[]
   teachers Teacher[]
+  tel String?
+  email String?
+  address String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
