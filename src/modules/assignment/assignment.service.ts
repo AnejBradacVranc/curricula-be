@@ -6,6 +6,7 @@ import {
 import { Prisma, SubjectTeacher } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
+import { DeleteAssignmentDto } from './dto/delete-assignment.dto';
 
 const assignmentInclude = {
   subject: { omit: { schoolId: true } },
@@ -26,6 +27,38 @@ export class AssignmentsService {
     return this.prisma.subjectTeacher.findMany({
       where: { subject: { schoolId } },
       include: assignmentInclude,
+    });
+  }
+
+  async deleteAsignment(schoolId: number, data: DeleteAssignmentDto) {
+    const { subjectId, teacherId, programId } = data;
+
+    const programSubject = await this.prisma.programSubject.findFirst({
+      where: {
+        programId,
+        subjectId,
+        subject: { schoolId },
+        program: { schoolId },
+      },
+    });
+
+    if (!programSubject) {
+      throw new BadRequestException(
+        'Relation between program and subject not found for this school',
+      );
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.subjectTeacher.delete({
+        where: {
+          subjectId_teacherId: { subjectId, teacherId },
+        },
+      });
+
+      await tx.teacher.update({
+        where: { id: teacherId },
+        data: { assignedHours: { decrement: programSubject.requiredHours } },
+      });
     });
   }
 

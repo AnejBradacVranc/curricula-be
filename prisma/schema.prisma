@@ -108,7 +108,7 @@ model Teacher {
   email           String           @unique
   schoolId        Int
   subjectTeachers SubjectTeacher[]
-  assignedHours Int?
+  assignedHours Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())

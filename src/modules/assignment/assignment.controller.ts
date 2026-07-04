@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -12,6 +13,7 @@ import {
   AssignmentsService,
   AssignmentWithRelations,
 } from './assignment.service';
+import { DeleteAssignmentDto } from './dto/delete-assignment.dto';
 
 @Controller()
 export class AssignmentsController {
@@ -32,6 +34,17 @@ export class AssignmentsController {
     return this.assignmentsService.createAssignment(
       schoolId,
       createAssignmentDto,
+    );
+  }
+
+  @Delete()
+  async deleteAssignment(
+    @Param('schoolId', ParseIntPipe) schoolId: number,
+    @Body() deleteAssignmentDto: DeleteAssignmentDto,
+  ): Promise<void> {
+    return this.assignmentsService.deleteAsignment(
+      schoolId,
+      deleteAssignmentDto,
     );
   }
 }
