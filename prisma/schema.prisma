@@ -14,10 +14,20 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model School {
   id    Int     @default(autoincrement()) @id
   name String  @unique
   users User[]
+  programs Program[]
+  teachers Teacher[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model User {
@@ -25,7 +35,58 @@ model User {
   email String  @unique
   name  String?
   surname String?
-  school School? @relation(fields: [schoolId], references: [id])
-  schoolId Int?
-  role String
+  school School @relation(fields: [schoolId], references: [id])
+  schoolId Int
+  role Role @default(USER)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Program {
+  id    Int     @default(autoincrement()) @id
+  school School @relation(fields: [schoolId], references: [id])
+  schoolId Int
+  availableHours Int
+  classes Subject[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Subject{
+  id    Int     @default(autoincrement()) @id
+  program Program @relation(fields: [programId], references: [id])
+  programId Int
+  name String
+  requiredHours Int
+  subjectTeacher SubjectTeacher[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model SubjectTeacher {
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+  subject Subject @relation(fields: [subjectId], references: [id])
+  subjectId Int
+  teacherId Int
+  assignedHours Int?
+  @@id([subjectId, teacherId]) 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Teacher {
+id    Int     @default(autoincrement()) @id
+program School @relation(fields: [schoolId], references: [id])
+name String
+surname String
+email String @unique
+schoolId Int
+subjectTeacher SubjectTeacher[]
+
+createdAt DateTime @default(now())
+updatedAt DateTime @default(now())
 }

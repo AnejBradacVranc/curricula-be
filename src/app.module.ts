@@ -1,12 +1,25 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaModule } from './prisma/prisma.module';
-import { UsersModule } from './user/user.module';
+import { AssignmentsModule } from './modules/assignment/assignment.module';
+import { ProgramsModule } from './modules/program/program.module';
+import { SchoolsModule } from './modules/school/school.module';
+import { SubjectsModule } from './modules/subject/subject.module';
+import { TeachersModule } from './modules/teacher/teacher.module';
+import { UsersModule } from './modules/user/user.module';
+import { PrismaModule } from './core/prisma/prisma.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule], //Here put all other modules for app to use
+  imports: [
+    PrismaModule,
+    UsersModule,
+    SchoolsModule,
+    TeachersModule,
+    SubjectsModule,
+    AssignmentsModule,
+    ProgramsModule,
+  ],
   controllers: [AppController],
-  providers: [AppService], //Here put Services that will be injected in that specific controller
+  providers: [AppService],
 })
 export class AppModule {}
