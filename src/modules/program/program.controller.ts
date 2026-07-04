@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { Prisma, Program } from 'generated/prisma/client';
+import { Program } from 'generated/prisma/client';
+import { CreateProgramDto } from './dto/create-program.dto';
 import { ProgramsService } from './program.service';
 
 @Controller('programs')
@@ -13,7 +14,7 @@ export class ProgramsController {
 
   @Post()
   async createProgram(
-    @Body() createProgramDto: Prisma.ProgramCreateInput,
+    @Body() createProgramDto: CreateProgramDto,
   ): Promise<Program> {
     return this.programsService.createProgram(createProgramDto);
   }

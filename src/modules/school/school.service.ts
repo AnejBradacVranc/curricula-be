@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, School } from 'generated/prisma/client';
+import { School } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
+import { CreateSchoolDto } from './dto/create-school.dto';
 
 @Injectable()
 export class SchoolsService {
@@ -10,7 +11,7 @@ export class SchoolsService {
     return this.prisma.school.findMany();
   }
 
-  async createSchool(data: Prisma.SchoolCreateInput): Promise<School> {
+  async createSchool(data: CreateSchoolDto): Promise<School> {
     return this.prisma.school.create({ data });
   }
 }

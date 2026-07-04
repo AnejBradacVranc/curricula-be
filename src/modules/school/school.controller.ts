@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { SchoolsService } from './school.service';
-import { School, Prisma } from 'generated/prisma/client';
+import { School } from 'generated/prisma/client';
 import { CreateSchoolDto } from './dto/create-school.dto';
+import { SchoolsService } from './school.service';
 
 @Controller('schools')
 export class SchoolsController {

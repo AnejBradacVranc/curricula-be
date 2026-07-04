@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Subject } from 'generated/prisma/client';
+import { Subject } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
+import { CreateSubjectDto } from './dto/create-subject.dto';
 
 @Injectable()
 export class SubjectsService {
@@ -10,7 +11,14 @@ export class SubjectsService {
     return this.prisma.subject.findMany();
   }
 
-  async createSubject(data: Prisma.SubjectCreateInput): Promise<Subject> {
-    return this.prisma.subject.create({ data });
+  async createSubject(data: CreateSubjectDto): Promise<Subject> {
+    const { programId, name, requiredHours } = data;
+    return this.prisma.subject.create({
+      data: {
+        name,
+        requiredHours,
+        program: { connect: { id: programId } },
+      },
+    });
   }
 }

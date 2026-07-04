@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, Teacher } from 'generated/prisma/client';
+import { Teacher } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
+import { CreateTeacherDto } from './dto/create-teacher.dto';
 
 @Injectable()
 export class TeachersService {
@@ -10,7 +11,13 @@ export class TeachersService {
     return this.prisma.teacher.findMany();
   }
 
-  async createTeacher(data: Prisma.TeacherCreateInput): Promise<Teacher> {
-    return this.prisma.teacher.create({ data });
+  async createTeacher(data: CreateTeacherDto): Promise<Teacher> {
+    const { schoolId, ...rest } = data;
+    return this.prisma.teacher.create({
+      data: {
+        ...rest,
+        program: { connect: { id: schoolId } },
+      },
+    });
   }
 }

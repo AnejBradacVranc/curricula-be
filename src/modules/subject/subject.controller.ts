@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { Prisma, Subject } from 'generated/prisma/client';
+import { Subject } from 'generated/prisma/client';
+import { CreateSubjectDto } from './dto/create-subject.dto';
 import { SubjectsService } from './subject.service';
 
 @Controller('subjects')
@@ -13,7 +14,7 @@ export class SubjectsController {
 
   @Post()
   async createSubject(
-    @Body() createSubjectDto: Prisma.SubjectCreateInput,
+    @Body() createSubjectDto: CreateSubjectDto,
   ): Promise<Subject> {
     return this.subjectsService.createSubject(createSubjectDto);
   }
