@@ -47,7 +47,7 @@ import { UsersModule } from './modules/user/user.module';
             module: AssignmentsModule,
           },
           {
-            path: ':schoolId/program-subjects',
+            path: ':schoolId/subject-to-program',
             module: ProgramSubjectsModule,
           },
         ],

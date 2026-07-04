@@ -10,6 +10,10 @@ export class CreateAssignmentDto {
   @IsInt()
   teacherId: number;
 
+  @Type(() => Number)
+  @IsInt()
+  programId: number;
+
   //@IsOptional()
   //@Type(() => Number)
   //@IsInt()

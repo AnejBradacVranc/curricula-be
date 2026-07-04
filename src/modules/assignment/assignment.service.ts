@@ -33,35 +33,43 @@ export class AssignmentsService {
     schoolId: number,
     data: CreateAssignmentDto,
   ): Promise<SubjectTeacher> {
-    const { subjectId, teacherId, ...rest } = data;
+    const { subjectId, teacherId, programId } = data;
 
-    const [subject, teacher] = await Promise.all([
-      this.prisma.subject.findUnique({ where: { id: subjectId } }),
-      this.prisma.teacher.findUnique({ where: { id: teacherId } }),
+    const [teacher, programSubject] = await Promise.all([
+      this.prisma.teacher.findFirst({
+        where: { id: teacherId, schoolId },
+      }),
+      this.prisma.programSubject.findFirst({
+        where: {
+          programId,
+          subjectId,
+          subject: { schoolId: schoolId },
+          program: { schoolId: schoolId },
+        },
+      }),
     ]);
 
-    if (!subject || !teacher) {
-      throw new NotFoundException('Subject or teacher not found');
+    if (!teacher) {
+      throw new NotFoundException('Teacher not found for this school');
     }
 
-    if (subject.schoolId !== schoolId || teacher.schoolId !== schoolId) {
+    if (!programSubject) {
       throw new BadRequestException(
-        'Subject and teacher must belong to this school',
+        'Relation between program and subject not found for this school',
       );
     }
 
-    if (subject.schoolId !== teacher.schoolId) {
-      throw new BadRequestException(
-        'Subject and teacher must belong to the same school',
-      );
-    }
-
-    return this.prisma.subjectTeacher.create({
-      data: {
-        ...rest,
-        subject: { connect: { id: subjectId } },
-        teacher: { connect: { id: teacherId } },
-      },
+    return this.prisma.$transaction(async (tx) => {
+      await tx.teacher.update({
+        where: { id: teacherId },
+        data: { assignedHours: { increment: programSubject.requiredHours } },
+      });
+      return tx.subjectTeacher.create({
+        data: {
+          subject: { connect: { id: subjectId } },
+          teacher: { connect: { id: teacherId } },
+        },
+      });
     });
   }
 }
