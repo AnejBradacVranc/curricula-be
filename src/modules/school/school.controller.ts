@@ -7,7 +7,7 @@ export class SchoolsController {
   constructor(private readonly schoolsService: SchoolsService) {}
 
   @Get()
-  async schools(): Promise<School[] | null> {
+  async getSchools(): Promise<School[] | null> {
     return this.schoolsService.schools();
   }
 

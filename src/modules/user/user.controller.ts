@@ -7,7 +7,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  async users(): Promise<User[] | null> {
+  async getUsers(): Promise<User[] | null> {
     return this.usersService.users();
   }
 

@@ -7,7 +7,7 @@ export class AssignmentsController {
   constructor(private readonly assignmentsService: AssignmentsService) {}
 
   @Get()
-  async assignments(): Promise<SubjectTeacher[] | null> {
+  async getAssignments(): Promise<SubjectTeacher[] | null> {
     return this.assignmentsService.assignments();
   }
 

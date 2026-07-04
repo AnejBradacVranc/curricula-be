@@ -7,7 +7,7 @@ export class ProgramsController {
   constructor(private readonly programsService: ProgramsService) {}
 
   @Get()
-  async programs(): Promise<Program[] | null> {
+  async getPrograms(): Promise<Program[] | null> {
     return this.programsService.programs();
   }
 
