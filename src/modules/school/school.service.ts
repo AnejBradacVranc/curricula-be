@@ -4,7 +4,7 @@ import { PrismaService } from 'src/core/prisma/prisma.service';
 import { CreateSchoolDto } from './dto/create-school.dto';
 
 const schoolInclude = {
-  users: false,
+  users: { omit: { schoolId: true } },
   programs: { omit: { schoolId: true } },
   subjects: { omit: { schoolId: true } },
   teachers: { omit: { schoolId: true } },

@@ -1,19 +1,31 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { User } from 'generated/prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './user.service';
 
-@Controller('users')
+@Controller()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  async getUsers(): Promise<User[] | null> {
-    return this.usersService.users();
+  async getUsers(
+    @Param('schoolId', ParseIntPipe) schoolId: number,
+  ): Promise<User[]> {
+    return this.usersService.usersBySchool(schoolId);
   }
 
   @Post()
-  async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.createUser(createUserDto);
+  async createUser(
+    @Param('schoolId', ParseIntPipe) schoolId: number,
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<User> {
+    return this.usersService.createUser(schoolId, createUserDto);
   }
 }

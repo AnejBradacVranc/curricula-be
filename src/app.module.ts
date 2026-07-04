@@ -27,6 +27,10 @@ import { UsersModule } from './modules/user/user.module';
         module: SchoolsModule,
         children: [
           {
+            path: ':schoolId/users',
+            module: UsersModule,
+          },
+          {
             path: ':schoolId/teachers',
             module: TeachersModule,
           },

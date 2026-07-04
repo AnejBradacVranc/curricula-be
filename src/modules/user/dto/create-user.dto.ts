@@ -1,9 +1,7 @@
 import { Role } from 'generated/prisma/client';
-import { Type } from 'class-transformer';
 import {
   IsEmail,
   IsEnum,
-  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -21,10 +19,6 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   surname?: string;
-
-  @Type(() => Number)
-  @IsInt()
-  schoolId: number;
 
   @IsOptional()
   @IsEnum(Role)

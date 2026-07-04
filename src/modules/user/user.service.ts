@@ -7,15 +7,16 @@ import { CreateUserDto } from './dto/create-user.dto';
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async users(): Promise<User[] | null> {
-    return this.prisma.user.findMany();
+  async usersBySchool(schoolId: number): Promise<User[]> {
+    return this.prisma.user.findMany({
+      where: { schoolId },
+    });
   }
 
-  async createUser(data: CreateUserDto): Promise<User> {
-    const { schoolId, ...rest } = data;
+  async createUser(schoolId: number, data: CreateUserDto): Promise<User> {
     return this.prisma.user.create({
       data: {
-        ...rest,
+        ...data,
         school: { connect: { id: schoolId } },
       },
     });
