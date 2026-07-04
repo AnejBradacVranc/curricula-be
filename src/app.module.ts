@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AssignmentsModule } from './modules/assignment/assignment.module';
+import { ProgramSubjectsModule } from './modules/program-subject/program-subject.module';
 import { ProgramsModule } from './modules/program/program.module';
 import { SchoolsModule } from './modules/school/school.module';
 import { SubjectsModule } from './modules/subject/subject.module';
@@ -18,6 +19,7 @@ import { PrismaModule } from './core/prisma/prisma.module';
     SubjectsModule,
     AssignmentsModule,
     ProgramsModule,
+    ProgramSubjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

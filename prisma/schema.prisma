@@ -4,10 +4,9 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
-  moduleFormat    = "cjs"
-
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
@@ -20,77 +19,96 @@ enum Role {
 }
 
 model School {
-  id    Int     @default(autoincrement()) @id
-  name String  @unique
-  users User[]
+  id       Int        @id @default(autoincrement())
+  name     String     @unique
+  users    User[]
   programs Program[]
+  subjects Subject[]
   teachers Teacher[]
-  tel String?
-  email String?
-  address String?
+  tel      String?
+  email    String?
+  address  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
 
 model User {
-  id    Int     @default(autoincrement()) @id
-  email String  @unique
-  name  String?
-  surname String?
-  school School @relation(fields: [schoolId], references: [id])
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
+  name     String?
+  surname  String?
+  school   School  @relation(fields: [schoolId], references: [id])
   schoolId Int
-  role Role @default(USER)
+  role     Role    @default(USER)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
 
 model Program {
-  id    Int     @default(autoincrement()) @id
-  name String @unique
-  school School @relation(fields: [schoolId], references: [id])
-  schoolId Int
-  availableHours Int
-  classes Subject[]
+  id              Int              @id @default(autoincrement())
+  name            String
+  school          School           @relation(fields: [schoolId], references: [id])
+  schoolId        Int
+  availableHours  Int
+  programSubjects ProgramSubject[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+
+  @@unique([schoolId, name])
 }
 
-model Subject{
-  id    Int     @default(autoincrement()) @id 
-  program Program @relation(fields: [programId], references: [id])
-  programId Int
-  name String
+model Subject {
+  id              Int              @id @default(autoincrement())
+  name            String
+  school          School           @relation(fields: [schoolId], references: [id])
+  schoolId        Int
+  subjectTeachers SubjectTeacher[]
+  programSubjects ProgramSubject[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@unique([schoolId, name])
+}
+
+model ProgramSubject {
+  program       Program @relation(fields: [programId], references: [id])
+  subject       Subject @relation(fields: [subjectId], references: [id])
+  programId     Int
+  subjectId     Int
   requiredHours Int
-  subjectTeacher SubjectTeacher[]
+
+  @@id([programId, subjectId])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
 
 model SubjectTeacher {
-  teacher Teacher @relation(fields: [teacherId], references: [id])
-  subject Subject @relation(fields: [subjectId], references: [id])
-  subjectId Int
-  teacherId Int
+  teacher       Teacher @relation(fields: [teacherId], references: [id])
+  subject       Subject @relation(fields: [subjectId], references: [id])
+  subjectId     Int
+  teacherId     Int
   assignedHours Int?
-  @@id([subjectId, teacherId]) 
+
+  @@id([subjectId, teacherId])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
 
 model Teacher {
-id    Int     @default(autoincrement()) @id
-program School @relation(fields: [schoolId], references: [id])
-name String
-surname String
-email String @unique
-schoolId Int
-subjectTeacher SubjectTeacher[]
+  id              Int              @id @default(autoincrement())
+  school          School           @relation(fields: [schoolId], references: [id])
+  name            String
+  surname         String
+  email           String           @unique
+  schoolId        Int
+  subjectTeachers SubjectTeacher[]
 
-createdAt DateTime @default(now())
-updatedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }

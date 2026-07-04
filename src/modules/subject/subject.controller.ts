@@ -8,7 +8,7 @@ export class SubjectsController {
   constructor(private readonly subjectsService: SubjectsService) {}
 
   @Get()
-  async getSubjects(): Promise<Subject[] | null> {
+  async getSubjects(): Promise<Subject[]> {
     return this.subjectsService.subjects();
   }
 

@@ -16,7 +16,7 @@ export class TeachersService {
     return this.prisma.teacher.create({
       data: {
         ...rest,
-        program: { connect: { id: schoolId } },
+        school: { connect: { id: schoolId } },
       },
     });
   }

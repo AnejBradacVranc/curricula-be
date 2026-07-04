@@ -6,6 +6,7 @@ import { CreateSchoolDto } from './dto/create-school.dto';
 const schoolInclude = {
   users: false,
   programs: { omit: { schoolId: true } },
+  subjects: { omit: { schoolId: true } },
   teachers: { omit: { schoolId: true } },
 } as const satisfies Prisma.SchoolInclude;
 

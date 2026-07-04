@@ -7,16 +7,16 @@ import { CreateSubjectDto } from './dto/create-subject.dto';
 export class SubjectsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async subjects(): Promise<Subject[] | null> {
+  async subjects(): Promise<Subject[]> {
     return this.prisma.subject.findMany();
   }
 
   async createSubject(data: CreateSubjectDto): Promise<Subject> {
-    const { programId, ...rest } = data;
+    const { schoolId, ...rest } = data;
     return this.prisma.subject.create({
       data: {
         ...rest,
-        program: { connect: { id: programId } },
+        school: { connect: { id: schoolId } },
       },
     });
   }
