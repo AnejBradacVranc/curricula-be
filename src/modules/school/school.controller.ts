@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { SchoolsService } from './school.service';
 import { School, Prisma } from 'generated/prisma/client';
+import { CreateSchoolDto } from './dto/create-school.dto';
 
 @Controller('schools')
 export class SchoolsController {
@@ -13,7 +14,7 @@ export class SchoolsController {
 
   @Post()
   async createSchool(
-    @Body() createSchoolDto: Prisma.SchoolCreateInput,
+    @Body() createSchoolDto: CreateSchoolDto,
   ): Promise<School> {
     return this.schoolsService.createSchool(createSchoolDto);
   }
