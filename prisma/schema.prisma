@@ -48,7 +48,7 @@ model User {
 
 model Program {
   id    Int     @default(autoincrement()) @id
-  name String
+  name String @unique
   school School @relation(fields: [schoolId], references: [id])
   schoolId Int
   availableHours Int
@@ -59,7 +59,7 @@ model Program {
 }
 
 model Subject{
-  id    Int     @default(autoincrement()) @id
+  id    Int     @default(autoincrement()) @id 
   program Program @relation(fields: [programId], references: [id])
   programId Int
   name String
