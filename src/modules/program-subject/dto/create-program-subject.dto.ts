@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber } from 'class-validator';
 
 export class CreateProgramSubjectDto {
   @Type(() => Number)
@@ -11,7 +11,7 @@ export class CreateProgramSubjectDto {
   subjectId: number;
 
   @Type(() => Number)
-  @IsInt()
+  @IsNumber({ maxDecimalPlaces: 2 })
   @IsNotEmpty()
   requiredHours: number;
 }

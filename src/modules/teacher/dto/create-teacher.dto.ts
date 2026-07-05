@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsEmail, IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsInt, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateTeacherDto {
   @IsString()
@@ -15,7 +15,7 @@ export class CreateTeacherDto {
   email: string;
 
   @Type(() => Number)
-  @IsInt()
+  @IsNumber({ maxDecimalPlaces: 2 })
   @IsNotEmpty()
   assignedHours: number;
 }

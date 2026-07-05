@@ -52,7 +52,7 @@ model Program {
   name            String
   school          School           @relation(fields: [schoolId], references: [id])
   schoolId        Int
-  availableHours  Int
+  availableHours  Decimal @db.Decimal(8, 2)
   programSubjects ProgramSubject[]
 
   createdAt DateTime @default(now())
@@ -80,7 +80,7 @@ model ProgramSubject {
   subject       Subject @relation(fields: [subjectId], references: [id])
   programId     Int
   subjectId     Int
-  requiredHours Int
+  requiredHours Decimal @db.Decimal(8, 2)
 
   @@id([programId, subjectId])
 
@@ -109,7 +109,7 @@ model Teacher {
   email           String           @unique
   schoolId        Int
   subjectTeachers SubjectTeacher[]
-  assignedHours Int @default(0)
+  assignedHours Decimal @default(0) @db.Decimal(8, 2)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
