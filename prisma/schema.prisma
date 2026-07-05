@@ -37,7 +37,8 @@ model User {
   id       Int     @id @default(autoincrement())
   email    String  @unique
   name     String?
-  surname  String?
+  surname  String?  
+  password String
   school   School  @relation(fields: [schoolId], references: [id])
   schoolId Int
   role     Role    @default(USER)

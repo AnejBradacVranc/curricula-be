@@ -3,11 +3,12 @@ import {
   IsEmail,
   IsEnum,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
 
-export class CreateUserDto {
+export class RegisterUserDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -23,4 +24,12 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(Role)
   role?: Role;
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  schoolId: number;
 }

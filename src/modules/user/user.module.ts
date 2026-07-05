@@ -4,6 +4,7 @@ import { UsersService } from './user.service';
 
 @Module({
   controllers: [UsersController],
-  providers: [UsersService], //Here put Services that will be injected in that specific controller
+  providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}

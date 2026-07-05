@@ -10,6 +10,7 @@ import { SchoolsModule } from './modules/school/school.module';
 import { SubjectsModule } from './modules/subject/subject.module';
 import { TeachersModule } from './modules/teacher/teacher.module';
 import { UsersModule } from './modules/user/user.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { UsersModule } from './modules/user/user.module';
         ],
       },
     ]),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
