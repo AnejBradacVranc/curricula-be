@@ -7,6 +7,7 @@ import { PrismaModule } from './core/prisma/prisma.module';
 import { AssignmentsModule } from './modules/assignment/assignment.module';
 import { ProgramSubjectsModule } from './modules/program-subject/program-subject.module';
 import { ProgramsModule } from './modules/program/program.module';
+import { YearsModule } from './modules/year/year.module';
 import { SchoolsModule } from './modules/school/school.module';
 import { SubjectsModule } from './modules/subject/subject.module';
 import { TeachersModule } from './modules/teacher/teacher.module';
@@ -24,6 +25,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     AssignmentsModule,
     ProgramsModule,
     ProgramSubjectsModule,
+    YearsModule,
     RouterModule.register([
       {
         path: 'schools',
@@ -52,6 +54,10 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
           {
             path: 'subject-to-program',
             module: ProgramSubjectsModule,
+          },
+          {
+            path: 'years',
+            module: YearsModule,
           },
         ],
       },

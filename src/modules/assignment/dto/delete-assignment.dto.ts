@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt } from 'class-validator';
+import { IsInt, Min } from 'class-validator';
 
 export class DeleteAssignmentDto {
   @Type(() => Number)
@@ -13,4 +13,9 @@ export class DeleteAssignmentDto {
   @Type(() => Number)
   @IsInt()
   programId: number;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  yearId: number;
 }

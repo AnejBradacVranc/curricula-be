@@ -10,6 +10,11 @@ import { DeleteAssignmentDto } from './dto/delete-assignment.dto';
 
 const programSubjectInclude = {
   subject: { omit: { schoolId: true } },
+  programYear: {
+    include: {
+      year: true,
+    },
+  },
   teacher: { omit: { schoolId: true } },
 } as const satisfies Prisma.ProgramSubjectInclude;
 
@@ -25,7 +30,7 @@ export class AssignmentsService {
     schoolId: number,
     data: CreateAssignmentDto,
   ): Promise<AssignedProgramSubject> {
-    const { subjectId, teacherId, programId } = data;
+    const { subjectId, teacherId, programId, yearId } = data;
 
     const [teacher, programSubject] = await Promise.all([
       this.prisma.teacher.findFirst({
@@ -35,6 +40,7 @@ export class AssignmentsService {
         where: {
           programId,
           subjectId,
+          yearId,
           subject: { schoolId },
           program: { schoolId },
         },
@@ -54,7 +60,7 @@ export class AssignmentsService {
     if (programSubject.teacherId === teacherId) {
       return this.prisma.programSubject.findUniqueOrThrow({
         where: {
-          programId_subjectId: { programId, subjectId },
+          programId_subjectId_yearId: { programId, subjectId, yearId },
         },
         include: programSubjectInclude,
       });
@@ -75,7 +81,7 @@ export class AssignmentsService {
 
       return tx.programSubject.update({
         where: {
-          programId_subjectId: { programId, subjectId },
+          programId_subjectId_yearId: { programId, subjectId, yearId },
         },
         data: {
           teacher: { connect: { id: teacherId } },
@@ -86,12 +92,13 @@ export class AssignmentsService {
   }
 
   async deleteAsignment(schoolId: number, data: DeleteAssignmentDto) {
-    const { subjectId, teacherId, programId } = data;
+    const { subjectId, teacherId, programId, yearId } = data;
 
     const programSubject = await this.prisma.programSubject.findFirst({
       where: {
         programId,
         subjectId,
+        yearId,
         subject: { schoolId },
         program: { schoolId },
       },
@@ -110,7 +117,7 @@ export class AssignmentsService {
     return this.prisma.$transaction(async (tx) => {
       await tx.programSubject.update({
         where: {
-          programId_subjectId: { programId, subjectId },
+          programId_subjectId_yearId: { programId, subjectId, yearId },
         },
         data: {
           teacher: { disconnect: true },

@@ -47,18 +47,42 @@ model User {
   updatedAt DateTime @default(now())
 }
 
+model Year {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  programYears ProgramYear[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
 model Program {
   id              Int              @id @default(autoincrement())
   name            String
   school          School           @relation(fields: [schoolId], references: [id])
   schoolId        Int
   availableHours  Decimal          @db.Decimal(8, 2)
+  programYears    ProgramYear[]
   programSubjects ProgramSubject[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
   @@unique([schoolId, name])
+}
+
+model ProgramYear {
+  program         Program          @relation(fields: [programId], references: [id])
+  year            Year             @relation(fields: [yearId], references: [id])
+  programId       Int
+  yearId          Int
+  numWeeks        Int
+  programSubjects ProgramSubject[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@id([programId, yearId])
 }
 
 model Subject {
@@ -75,15 +99,17 @@ model Subject {
 }
 
 model ProgramSubject {
-  program       Program  @relation(fields: [programId], references: [id])
-  subject       Subject  @relation(fields: [subjectId], references: [id])
-  teacher       Teacher? @relation(fields: [teacherId], references: [id])
+  program       Program     @relation(fields: [programId], references: [id])
+  subject       Subject     @relation(fields: [subjectId], references: [id])
+  programYear   ProgramYear @relation(fields: [programId, yearId], references: [programId, yearId])
+  teacher       Teacher?    @relation(fields: [teacherId], references: [id])
   programId     Int
   subjectId     Int
+  yearId        Int
   teacherId     Int?
-  requiredHours Decimal  @db.Decimal(8, 2)
+  requiredHours Decimal     @db.Decimal(8, 2)
 
-  @@id([programId, subjectId])
+  @@id([programId, subjectId, yearId])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())

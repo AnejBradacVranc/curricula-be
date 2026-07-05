@@ -1,11 +1,20 @@
 -- Demo seed: Srednja gradbena šola in gimnazija Maribor
--- Izvedbeni predmetniki 2025/26 – all hour values are weekly (ur/teden).
+-- Izvedbeni predmetniki 2025/26 – weekly hours (ur/teden) from official PDFs.
 
 BEGIN;
 
-TRUNCATE "ProgramSubject", "Subject", "Program", "Teacher" RESTART IDENTITY CASCADE;
+INSERT INTO "Year" (id, name, "createdAt", "updatedAt")
+VALUES
+  (1, '1. letnik', NOW(), NOW()),
+  (2, '2. letnik', NOW(), NOW()),
+  (3, '3. letnik', NOW(), NOW()),
+  (4, '4. letnik', NOW(), NOW())
+ON CONFLICT (name) DO UPDATE SET "updatedAt" = NOW();
 
--- ─── Programs ───────────────────────────────────────────────────────────────
+SELECT setval(pg_get_serial_sequence('"Year"', 'id'), (SELECT MAX(id) FROM "Year"));
+
+TRUNCATE "ProgramSubject", "ProgramYear", "Subject", "Program", "Teacher" RESTART IDENTITY CASCADE;
+
 INSERT INTO "Program" (id, name, "schoolId", "availableHours", "createdAt", "updatedAt")
 VALUES
   (1,  'Gradbeni tehnik', 3, 35.00, NOW(), NOW()),
@@ -21,7 +30,19 @@ VALUES
 
 SELECT setval(pg_get_serial_sequence('"Program"', 'id'), (SELECT MAX(id) FROM "Program"));
 
--- ─── Subjects ───────────────────────────────────────────────────────────────
+INSERT INTO "ProgramYear" ("programId", "yearId", "numWeeks", "createdAt", "updatedAt")
+VALUES
+  (1, 1, 35, NOW(), NOW()), (1, 2, 33, NOW(), NOW()), (1, 3, 33, NOW(), NOW()), (1, 4, 34, NOW(), NOW()),
+  (2, 1, 35, NOW(), NOW()), (2, 2, 33, NOW(), NOW()), (2, 3, 33, NOW(), NOW()), (2, 4, 34, NOW(), NOW()),
+  (3, 1, 32, NOW(), NOW()), (3, 2, 31, NOW(), NOW()),
+  (4, 1, 33, NOW(), NOW()), (4, 2, 33, NOW(), NOW()), (4, 3, 16, NOW(), NOW()),
+  (5, 1, 33, NOW(), NOW()), (5, 2, 33, NOW(), NOW()), (5, 3, 16, NOW(), NOW()),
+  (6, 1, 33, NOW(), NOW()), (6, 2, 33, NOW(), NOW()), (6, 3, 16, NOW(), NOW()),
+  (7, 1, 33, NOW(), NOW()), (7, 2, 33, NOW(), NOW()), (7, 3, 16, NOW(), NOW()),
+  (8, 1, 33, NOW(), NOW()), (8, 2, 33, NOW(), NOW()), (8, 3, 16, NOW(), NOW()),
+  (9, 1, 33, NOW(), NOW()), (9, 2, 33, NOW(), NOW()), (9, 3, 16, NOW(), NOW()),
+  (10, 1, 35, NOW(), NOW()), (10, 2, 31, NOW(), NOW()), (10, 3, 31, NOW(), NOW()), (10, 4, 34, NOW(), NOW());
+
 INSERT INTO "Subject" (id, name, "schoolId", "createdAt", "updatedAt")
 VALUES
   (1,  'Slovenščina', 3, NOW(), NOW()),
@@ -58,79 +79,355 @@ VALUES
   (32, 'Tehnično risanje in uporaba računalnika', 3, NOW(), NOW()),
   (33, 'Materiali in okolje', 3, NOW(), NOW()),
   (34, 'Okoljevarstvene tehnologije', 3, NOW(), NOW()),
-  (35, 'Biologija', 3, NOW(), NOW());
+  (35, 'Biologija', 3, NOW(), NOW()),
+  (36, 'Geografija', 3, NOW(), NOW()),
+  (37, 'Sociologija', 3, NOW(), NOW()),
+  (38, 'Interesne dejavnosti', 3, NOW(), NOW()),
+  (39, 'Priprava in vodenje gradbenih del', 3, NOW(), NOW()),
+  (40, 'Novi materiali v gradbeništvu', 3, NOW(), NOW()),
+  (41, 'Kalkulacije in poslovanje', 3, NOW(), NOW()),
+  (42, 'Geodezija v gradbeništvu', 3, NOW(), NOW()),
+  (43, '3D oblikovanje v AutoCADu', 3, NOW(), NOW()),
+  (44, 'Sanacija in vzdrževanje zgradb', 3, NOW(), NOW()),
+  (45, 'Učinkovita raba energije', 3, NOW(), NOW()),
+  (46, 'Projektiranje stavb', 3, NOW(), NOW()),
+  (47, 'Projektiranje gradbenih inženirskih objektov', 3, NOW(), NOW()),
+  (48, 'Gradbena ekonomika in operativno planiranje', 3, NOW(), NOW()),
+  (49, 'Izdelava projektne dokumentacije', 3, NOW(), NOW()),
+  (50, 'Organizacija dela in poslovanje', 3, NOW(), NOW()),
+  (51, 'Okoljevarstvena zakonodaja', 3, NOW(), NOW()),
+  (52, 'Gospodarjenje z odpadki', 3, NOW(), NOW()),
+  (53, 'Gospodarjenje s pitno in tehnološko vodo', 3, NOW(), NOW()),
+  (54, 'Gospodarjenje z odpadnimi vodami', 3, NOW(), NOW()),
+  (55, 'Tehnologija tesarstva', 3, NOW(), NOW()),
+  (56, 'Tehnologija suhomontažne gradnje', 3, NOW(), NOW()),
+  (57, 'Tehnologija keramičarstva in pečarstva', 3, NOW(), NOW()),
+  (58, 'Tehnologija slikopleskarstva in črkoslikarstva', 3, NOW(), NOW()),
+  (59, 'Tehnologija zidarstva', 3, NOW(), NOW()),
+  (64, 'Opaženje', 3, NOW(), NOW()),
+  (65, 'Orodja in stroji v gradbeništvu', 3, NOW(), NOW()),
+  (66, 'Polaganje keramičnih ploščic', 3, NOW(), NOW()),
+  (67, 'Zdrav način življenja', 3, NOW(), NOW());
 
 SELECT setval(pg_get_serial_sequence('"Subject"', 'id'), (SELECT MAX(id) FROM "Subject"));
 
--- ─── Program ↔ Subject (weekly hours, 1. letnik where applicable) ───────────
-
-INSERT INTO "ProgramSubject" ("programId", "subjectId", "requiredHours", "createdAt", "updatedAt")
+INSERT INTO "ProgramSubject" ("programId", "subjectId", "yearId", "requiredHours", "createdAt", "updatedAt")
 VALUES
   -- 1 Gradbeni tehnik (SSI)
-  (1, 1, 4.00, NOW(), NOW()), (1, 2, 3.00, NOW(), NOW()), (1, 3, 3.00, NOW(), NOW()),
-  (1, 4, 3.00, NOW(), NOW()), (1, 11, 4.00, NOW(), NOW()), (1, 12, 4.00, NOW(), NOW()),
-  (1, 13, 3.00, NOW(), NOW()), (1, 14, 2.50, NOW(), NOW()),
-
-  -- 2 Tehniška gimnazija
-  (2, 1, 4.00, NOW(), NOW()), (2, 2, 4.00, NOW(), NOW()), (2, 3, 3.00, NOW(), NOW()),
-  (2, 4, 3.00, NOW(), NOW()), (2, 15, 2.00, NOW(), NOW()), (2, 16, 2.00, NOW(), NOW()),
-  (2, 17, 3.00, NOW(), NOW()), (2, 18, 2.50, NOW(), NOW()),
-
+  (1, 1, 1, 4.00, NOW(), NOW()),
+  (1, 3, 1, 3.00, NOW(), NOW()),
+  (1, 2, 1, 3.00, NOW(), NOW()),
+  (1, 7, 1, 2.00, NOW(), NOW()),
+  (1, 30, 1, 3.00, NOW(), NOW()),
+  (1, 36, 1, 2.00, NOW(), NOW()),
+  (1, 15, 1, 2.00, NOW(), NOW()),
+  (1, 16, 1, 2.00, NOW(), NOW()),
+  (1, 4, 1, 3.00, NOW(), NOW()),
+  (1, 11, 1, 4.00, NOW(), NOW()),
+  (1, 12, 1, 4.00, NOW(), NOW()),
+  (1, 38, 1, 3.00, NOW(), NOW()),
+  (1, 1, 2, 4.00, NOW(), NOW()),
+  (1, 3, 2, 3.00, NOW(), NOW()),
+  (1, 2, 2, 3.00, NOW(), NOW()),
+  (1, 37, 2, 2.00, NOW(), NOW()),
+  (1, 15, 2, 2.00, NOW(), NOW()),
+  (1, 4, 2, 3.00, NOW(), NOW()),
+  (1, 11, 2, 3.00, NOW(), NOW()),
+  (1, 14, 2, 2.00, NOW(), NOW()),
+  (1, 13, 2, 3.00, NOW(), NOW()),
+  (1, 12, 2, 4.00, NOW(), NOW()),
+  (1, 39, 2, 2.00, NOW(), NOW()),
+  (1, 40, 2, 2.00, NOW(), NOW()),
+  (1, 38, 2, 3.00, NOW(), NOW()),
+  (1, 1, 3, 3.00, NOW(), NOW()),
+  (1, 3, 3, 3.00, NOW(), NOW()),
+  (1, 2, 3, 3.00, NOW(), NOW()),
+  (1, 4, 3, 2.00, NOW(), NOW()),
+  (1, 11, 3, 2.00, NOW(), NOW()),
+  (1, 14, 3, 3.00, NOW(), NOW()),
+  (1, 13, 3, 3.00, NOW(), NOW()),
+  (1, 41, 3, 2.00, NOW(), NOW()),
+  (1, 42, 3, 2.00, NOW(), NOW()),
+  (1, 43, 3, 2.00, NOW(), NOW()),
+  (1, 44, 3, 2.00, NOW(), NOW()),
+  (1, 45, 3, 2.00, NOW(), NOW()),
+  (1, 48, 3, 2.00, NOW(), NOW()),
+  (1, 38, 3, 3.00, NOW(), NOW()),
+  (1, 1, 4, 3.50, NOW(), NOW()),
+  (1, 3, 4, 3.50, NOW(), NOW()),
+  (1, 2, 4, 3.00, NOW(), NOW()),
+  (1, 4, 4, 2.00, NOW(), NOW()),
+  (1, 11, 4, 2.00, NOW(), NOW()),
+  (1, 14, 4, 2.50, NOW(), NOW()),
+  (1, 13, 4, 3.50, NOW(), NOW()),
+  (1, 41, 4, 2.00, NOW(), NOW()),
+  (1, 46, 4, 2.00, NOW(), NOW()),
+  (1, 47, 4, 2.00, NOW(), NOW()),
+  (1, 49, 4, 6.00, NOW(), NOW()),
+  (1, 38, 4, 2.00, NOW(), NOW()),
+  -- 4 SPI
+  (4, 1, 1, 3.00, NOW(), NOW()),
+  (4, 2, 1, 3.00, NOW(), NOW()),
+  (4, 3, 1, 2.00, NOW(), NOW()),
+  (4, 7, 1, 1.00, NOW(), NOW()),
+  (4, 6, 1, 2.00, NOW(), NOW()),
+  (4, 5, 1, 2.00, NOW(), NOW()),
+  (4, 4, 1, 2.00, NOW(), NOW()),
+  (4, 8, 1, 3.00, NOW(), NOW()),
+  (4, 9, 1, 4.00, NOW(), NOW()),
+  (4, 10, 1, 2.00, NOW(), NOW()),
+  (4, 22, 1, 4.00, NOW(), NOW()),
+  (4, 29, 1, 2.00, NOW(), NOW()),
+  (4, 28, 1, 2.00, NOW(), NOW()),
+  (4, 1, 2, 2.00, NOW(), NOW()),
+  (4, 2, 2, 2.00, NOW(), NOW()),
+  (4, 3, 2, 2.00, NOW(), NOW()),
+  (4, 6, 2, 2.00, NOW(), NOW()),
+  (4, 5, 2, 2.00, NOW(), NOW()),
+  (4, 4, 2, 2.00, NOW(), NOW()),
+  (4, 8, 2, 2.00, NOW(), NOW()),
+  (4, 9, 2, 1.00, NOW(), NOW()),
+  (4, 10, 2, 1.00, NOW(), NOW()),
+  (4, 22, 2, 3.00, NOW(), NOW()),
+  (4, 28, 2, 7.00, NOW(), NOW()),
+  (4, 41, 2, 2.00, NOW(), NOW()),
+  (4, 1, 3, 3.00, NOW(), NOW()),
+  (4, 2, 3, 3.00, NOW(), NOW()),
+  (4, 3, 3, 2.00, NOW(), NOW()),
+  (4, 4, 3, 2.00, NOW(), NOW()),
+  (4, 8, 3, 2.00, NOW(), NOW()),
+  (4, 22, 3, 14.00, NOW(), NOW()),
+  (4, 28, 3, 6.00, NOW(), NOW()),
+  -- 5 SPI
+  (5, 1, 1, 3.00, NOW(), NOW()),
+  (5, 2, 1, 3.00, NOW(), NOW()),
+  (5, 3, 1, 2.00, NOW(), NOW()),
+  (5, 7, 1, 1.00, NOW(), NOW()),
+  (5, 6, 1, 2.00, NOW(), NOW()),
+  (5, 5, 1, 2.00, NOW(), NOW()),
+  (5, 4, 1, 2.00, NOW(), NOW()),
+  (5, 8, 1, 3.00, NOW(), NOW()),
+  (5, 9, 1, 4.00, NOW(), NOW()),
+  (5, 10, 1, 2.00, NOW(), NOW()),
+  (5, 23, 1, 4.00, NOW(), NOW()),
+  (5, 29, 1, 2.00, NOW(), NOW()),
+  (5, 55, 1, 2.00, NOW(), NOW()),
+  (5, 1, 2, 2.00, NOW(), NOW()),
+  (5, 2, 2, 2.00, NOW(), NOW()),
+  (5, 3, 2, 2.00, NOW(), NOW()),
+  (5, 6, 2, 2.00, NOW(), NOW()),
+  (5, 5, 2, 2.00, NOW(), NOW()),
+  (5, 4, 2, 2.00, NOW(), NOW()),
+  (5, 8, 2, 2.00, NOW(), NOW()),
+  (5, 9, 2, 1.00, NOW(), NOW()),
+  (5, 10, 2, 1.00, NOW(), NOW()),
+  (5, 23, 2, 3.00, NOW(), NOW()),
+  (5, 55, 2, 7.00, NOW(), NOW()),
+  (5, 41, 2, 2.00, NOW(), NOW()),
+  (5, 1, 3, 3.00, NOW(), NOW()),
+  (5, 2, 3, 3.00, NOW(), NOW()),
+  (5, 3, 3, 2.00, NOW(), NOW()),
+  (5, 4, 3, 2.00, NOW(), NOW()),
+  (5, 8, 3, 2.00, NOW(), NOW()),
+  (5, 23, 3, 14.00, NOW(), NOW()),
+  (5, 55, 3, 6.00, NOW(), NOW()),
+  -- 6 SPI
+  (6, 1, 1, 3.00, NOW(), NOW()),
+  (6, 2, 1, 3.00, NOW(), NOW()),
+  (6, 3, 1, 2.00, NOW(), NOW()),
+  (6, 7, 1, 1.00, NOW(), NOW()),
+  (6, 6, 1, 2.00, NOW(), NOW()),
+  (6, 5, 1, 2.00, NOW(), NOW()),
+  (6, 4, 1, 2.00, NOW(), NOW()),
+  (6, 8, 1, 3.00, NOW(), NOW()),
+  (6, 9, 1, 4.00, NOW(), NOW()),
+  (6, 10, 1, 2.00, NOW(), NOW()),
+  (6, 24, 1, 4.00, NOW(), NOW()),
+  (6, 29, 1, 2.00, NOW(), NOW()),
+  (6, 56, 1, 2.00, NOW(), NOW()),
+  (6, 1, 2, 2.00, NOW(), NOW()),
+  (6, 2, 2, 2.00, NOW(), NOW()),
+  (6, 3, 2, 2.00, NOW(), NOW()),
+  (6, 6, 2, 2.00, NOW(), NOW()),
+  (6, 5, 2, 2.00, NOW(), NOW()),
+  (6, 4, 2, 2.00, NOW(), NOW()),
+  (6, 8, 2, 2.00, NOW(), NOW()),
+  (6, 9, 2, 1.00, NOW(), NOW()),
+  (6, 10, 2, 1.00, NOW(), NOW()),
+  (6, 24, 2, 3.00, NOW(), NOW()),
+  (6, 56, 2, 7.00, NOW(), NOW()),
+  (6, 41, 2, 2.00, NOW(), NOW()),
+  (6, 1, 3, 3.00, NOW(), NOW()),
+  (6, 2, 3, 3.00, NOW(), NOW()),
+  (6, 3, 3, 2.00, NOW(), NOW()),
+  (6, 4, 3, 2.00, NOW(), NOW()),
+  (6, 8, 3, 2.00, NOW(), NOW()),
+  (6, 24, 3, 14.00, NOW(), NOW()),
+  (6, 56, 3, 6.00, NOW(), NOW()),
+  -- 7 SPI
+  (7, 1, 1, 3.00, NOW(), NOW()),
+  (7, 2, 1, 3.00, NOW(), NOW()),
+  (7, 3, 1, 2.00, NOW(), NOW()),
+  (7, 7, 1, 1.00, NOW(), NOW()),
+  (7, 6, 1, 2.00, NOW(), NOW()),
+  (7, 5, 1, 2.00, NOW(), NOW()),
+  (7, 4, 1, 2.00, NOW(), NOW()),
+  (7, 8, 1, 3.00, NOW(), NOW()),
+  (7, 9, 1, 4.00, NOW(), NOW()),
+  (7, 10, 1, 2.00, NOW(), NOW()),
+  (7, 25, 1, 4.00, NOW(), NOW()),
+  (7, 29, 1, 2.00, NOW(), NOW()),
+  (7, 57, 1, 2.00, NOW(), NOW()),
+  (7, 1, 2, 2.00, NOW(), NOW()),
+  (7, 2, 2, 2.00, NOW(), NOW()),
+  (7, 3, 2, 2.00, NOW(), NOW()),
+  (7, 6, 2, 2.00, NOW(), NOW()),
+  (7, 5, 2, 2.00, NOW(), NOW()),
+  (7, 4, 2, 2.00, NOW(), NOW()),
+  (7, 8, 2, 2.00, NOW(), NOW()),
+  (7, 9, 2, 1.00, NOW(), NOW()),
+  (7, 10, 2, 1.00, NOW(), NOW()),
+  (7, 25, 2, 3.00, NOW(), NOW()),
+  (7, 57, 2, 7.00, NOW(), NOW()),
+  (7, 41, 2, 2.00, NOW(), NOW()),
+  (7, 1, 3, 3.00, NOW(), NOW()),
+  (7, 2, 3, 3.00, NOW(), NOW()),
+  (7, 3, 3, 2.00, NOW(), NOW()),
+  (7, 4, 3, 2.00, NOW(), NOW()),
+  (7, 8, 3, 2.00, NOW(), NOW()),
+  (7, 25, 3, 14.00, NOW(), NOW()),
+  (7, 57, 3, 6.00, NOW(), NOW()),
+  -- 8 SPI
+  (8, 1, 1, 3.00, NOW(), NOW()),
+  (8, 2, 1, 3.00, NOW(), NOW()),
+  (8, 3, 1, 2.00, NOW(), NOW()),
+  (8, 7, 1, 1.00, NOW(), NOW()),
+  (8, 6, 1, 2.00, NOW(), NOW()),
+  (8, 5, 1, 2.00, NOW(), NOW()),
+  (8, 4, 1, 2.00, NOW(), NOW()),
+  (8, 8, 1, 3.00, NOW(), NOW()),
+  (8, 9, 1, 4.00, NOW(), NOW()),
+  (8, 10, 1, 2.00, NOW(), NOW()),
+  (8, 26, 1, 4.00, NOW(), NOW()),
+  (8, 29, 1, 2.00, NOW(), NOW()),
+  (8, 58, 1, 2.00, NOW(), NOW()),
+  (8, 1, 2, 2.00, NOW(), NOW()),
+  (8, 2, 2, 2.00, NOW(), NOW()),
+  (8, 3, 2, 2.00, NOW(), NOW()),
+  (8, 6, 2, 2.00, NOW(), NOW()),
+  (8, 5, 2, 2.00, NOW(), NOW()),
+  (8, 4, 2, 2.00, NOW(), NOW()),
+  (8, 8, 2, 2.00, NOW(), NOW()),
+  (8, 9, 2, 1.00, NOW(), NOW()),
+  (8, 10, 2, 1.00, NOW(), NOW()),
+  (8, 26, 2, 3.00, NOW(), NOW()),
+  (8, 58, 2, 7.00, NOW(), NOW()),
+  (8, 41, 2, 2.00, NOW(), NOW()),
+  (8, 1, 3, 3.00, NOW(), NOW()),
+  (8, 2, 3, 3.00, NOW(), NOW()),
+  (8, 3, 3, 2.00, NOW(), NOW()),
+  (8, 4, 3, 2.00, NOW(), NOW()),
+  (8, 8, 3, 2.00, NOW(), NOW()),
+  (8, 26, 3, 14.00, NOW(), NOW()),
+  (8, 58, 3, 6.00, NOW(), NOW()),
+  -- 9 SPI
+  (9, 1, 1, 3.00, NOW(), NOW()),
+  (9, 2, 1, 3.00, NOW(), NOW()),
+  (9, 3, 1, 2.00, NOW(), NOW()),
+  (9, 7, 1, 1.00, NOW(), NOW()),
+  (9, 6, 1, 2.00, NOW(), NOW()),
+  (9, 5, 1, 2.00, NOW(), NOW()),
+  (9, 4, 1, 2.00, NOW(), NOW()),
+  (9, 8, 1, 3.00, NOW(), NOW()),
+  (9, 9, 1, 4.00, NOW(), NOW()),
+  (9, 10, 1, 2.00, NOW(), NOW()),
+  (9, 27, 1, 4.00, NOW(), NOW()),
+  (9, 29, 1, 2.00, NOW(), NOW()),
+  (9, 59, 1, 2.00, NOW(), NOW()),
+  (9, 1, 2, 2.00, NOW(), NOW()),
+  (9, 2, 2, 2.00, NOW(), NOW()),
+  (9, 3, 2, 2.00, NOW(), NOW()),
+  (9, 6, 2, 2.00, NOW(), NOW()),
+  (9, 5, 2, 2.00, NOW(), NOW()),
+  (9, 4, 2, 2.00, NOW(), NOW()),
+  (9, 8, 2, 2.00, NOW(), NOW()),
+  (9, 9, 2, 1.00, NOW(), NOW()),
+  (9, 10, 2, 1.00, NOW(), NOW()),
+  (9, 27, 2, 3.00, NOW(), NOW()),
+  (9, 59, 2, 7.00, NOW(), NOW()),
+  (9, 41, 2, 2.00, NOW(), NOW()),
+  (9, 1, 3, 3.00, NOW(), NOW()),
+  (9, 2, 3, 3.00, NOW(), NOW()),
+  (9, 3, 3, 2.00, NOW(), NOW()),
+  (9, 4, 3, 2.00, NOW(), NOW()),
+  (9, 8, 3, 2.00, NOW(), NOW()),
+  (9, 27, 3, 14.00, NOW(), NOW()),
+  (9, 59, 3, 6.00, NOW(), NOW()),
   -- 3 Pomočnik pri tehnologiji gradnje (NPI)
-  (3, 1, 2.00, NOW(), NOW()), (3, 2, 3.00, NOW(), NOW()), (3, 5, 2.00, NOW(), NOW()),
-  (3, 6, 2.00, NOW(), NOW()), (3, 4, 2.00, NOW(), NOW()),
-  (3, 19, 9.00, NOW(), NOW()), (3, 20, 2.00, NOW(), NOW()), (3, 21, 7.00, NOW(), NOW()),
+  (3, 1, 1, 2.00, NOW(), NOW()),
+  (3, 2, 1, 3.00, NOW(), NOW()),
+  (3, 5, 1, 2.00, NOW(), NOW()),
+  (3, 6, 1, 2.00, NOW(), NOW()),
+  (3, 4, 1, 2.00, NOW(), NOW()),
+  (3, 19, 1, 9.00, NOW(), NOW()),
+  (3, 20, 1, 2.00, NOW(), NOW()),
+  (3, 21, 1, 7.00, NOW(), NOW()),
+  (3, 38, 1, 2.00, NOW(), NOW()),
+  (3, 1, 2, 3.00, NOW(), NOW()),
+  (3, 2, 2, 2.00, NOW(), NOW()),
+  (3, 5, 2, 2.00, NOW(), NOW()),
+  (3, 6, 2, 2.00, NOW(), NOW()),
+  (3, 4, 2, 2.00, NOW(), NOW()),
+  (3, 19, 2, 5.00, NOW(), NOW()),
+  (3, 20, 2, 2.00, NOW(), NOW()),
+  (3, 21, 2, 6.00, NOW(), NOW()),
+  (3, 64, 2, 5.00, NOW(), NOW()),
+  (3, 65, 2, 2.00, NOW(), NOW()),
+  (3, 66, 2, 3.00, NOW(), NOW()),
+  (3, 67, 2, 1.00, NOW(), NOW()),
+  (3, 38, 2, 1.00, NOW(), NOW()),
+  -- 10 Okoljevarstveni tehnik (SSI)
+  (10, 1, 1, 4.00, NOW(), NOW()),
+  (10, 3, 1, 3.00, NOW(), NOW()),
+  (10, 2, 1, 3.00, NOW(), NOW()),
+  (10, 7, 1, 2.00, NOW(), NOW()),
+  (10, 30, 1, 3.00, NOW(), NOW()),
+  (10, 15, 1, 2.00, NOW(), NOW()),
+  (10, 16, 1, 2.00, NOW(), NOW()),
+  (10, 35, 1, 2.00, NOW(), NOW()),
+  (10, 4, 1, 3.00, NOW(), NOW()),
+  (10, 31, 1, 5.00, NOW(), NOW()),
+  (10, 32, 1, 4.00, NOW(), NOW()),
+  (10, 1, 2, 4.00, NOW(), NOW()),
+  (10, 3, 2, 3.00, NOW(), NOW()),
+  (10, 2, 2, 3.00, NOW(), NOW()),
+  (10, 36, 2, 2.00, NOW(), NOW()),
+  (10, 4, 2, 3.00, NOW(), NOW()),
+  (10, 33, 2, 3.00, NOW(), NOW()),
+  (10, 34, 2, 3.00, NOW(), NOW()),
+  (10, 50, 2, 3.00, NOW(), NOW()),
+  (10, 1, 3, 3.00, NOW(), NOW()),
+  (10, 3, 3, 3.00, NOW(), NOW()),
+  (10, 2, 3, 3.00, NOW(), NOW()),
+  (10, 37, 3, 2.00, NOW(), NOW()),
+  (10, 4, 3, 2.00, NOW(), NOW()),
+  (10, 52, 3, 6.50, NOW(), NOW()),
+  (10, 53, 3, 6.50, NOW(), NOW()),
+  (10, 1, 4, 4.00, NOW(), NOW()),
+  (10, 3, 4, 4.00, NOW(), NOW()),
+  (10, 2, 4, 3.00, NOW(), NOW()),
+  (10, 4, 4, 2.00, NOW(), NOW()),
+  (10, 54, 4, 6.00, NOW(), NOW()),
+  -- 2 Tehniška gimnazija – 1. letnik (no PDF)
+  (2, 1, 1, 4.00, NOW(), NOW()),
+  (2, 2, 1, 4.00, NOW(), NOW()),
+  (2, 3, 1, 3.00, NOW(), NOW()),
+  (2, 4, 1, 3.00, NOW(), NOW()),
+  (2, 15, 1, 2.00, NOW(), NOW()),
+  (2, 16, 1, 2.00, NOW(), NOW()),
+  (2, 17, 1, 3.00, NOW(), NOW()),
+  (2, 18, 1, 2.50, NOW(), NOW());
 
-  -- 4 Dimnikar (SPI) – 1. letnik
-  (4, 1, 3.00, NOW(), NOW()), (4, 2, 3.00, NOW(), NOW()), (4, 3, 2.00, NOW(), NOW()),
-  (4, 7, 1.00, NOW(), NOW()), (4, 6, 2.00, NOW(), NOW()), (4, 5, 2.00, NOW(), NOW()),
-  (4, 4, 2.00, NOW(), NOW()),
-  (4, 8, 3.00, NOW(), NOW()), (4, 9, 4.00, NOW(), NOW()), (4, 10, 2.00, NOW(), NOW()),
-  (4, 22, 4.00, NOW(), NOW()), (4, 28, 2.00, NOW(), NOW()), (4, 29, 2.00, NOW(), NOW()),
-
-  -- 5 Tesar (SPI)
-  (5, 1, 3.00, NOW(), NOW()), (5, 2, 3.00, NOW(), NOW()), (5, 3, 2.00, NOW(), NOW()),
-  (5, 7, 1.00, NOW(), NOW()), (5, 6, 2.00, NOW(), NOW()), (5, 5, 2.00, NOW(), NOW()),
-  (5, 4, 2.00, NOW(), NOW()),
-  (5, 8, 3.00, NOW(), NOW()), (5, 9, 4.00, NOW(), NOW()), (5, 10, 2.00, NOW(), NOW()),
-  (5, 23, 4.00, NOW(), NOW()), (5, 29, 2.00, NOW(), NOW()),
-
-  -- 6 Izvajalec suhomontažne gradnje (SPI)
-  (6, 1, 3.00, NOW(), NOW()), (6, 2, 3.00, NOW(), NOW()), (6, 3, 2.00, NOW(), NOW()),
-  (6, 7, 1.00, NOW(), NOW()), (6, 6, 2.00, NOW(), NOW()), (6, 5, 2.00, NOW(), NOW()),
-  (6, 4, 2.00, NOW(), NOW()),
-  (6, 8, 3.00, NOW(), NOW()), (6, 9, 4.00, NOW(), NOW()), (6, 10, 2.00, NOW(), NOW()),
-  (6, 24, 4.00, NOW(), NOW()), (6, 29, 2.00, NOW(), NOW()),
-
-  -- 7 Pečar (SPI)
-  (7, 1, 3.00, NOW(), NOW()), (7, 2, 3.00, NOW(), NOW()), (7, 3, 2.00, NOW(), NOW()),
-  (7, 7, 1.00, NOW(), NOW()), (7, 6, 2.00, NOW(), NOW()), (7, 5, 2.00, NOW(), NOW()),
-  (7, 4, 2.00, NOW(), NOW()),
-  (7, 8, 3.00, NOW(), NOW()), (7, 9, 4.00, NOW(), NOW()), (7, 10, 2.00, NOW(), NOW()),
-  (7, 25, 4.00, NOW(), NOW()), (7, 29, 2.00, NOW(), NOW()),
-
-  -- 8 Slikopleskar – črkoslikar (SPI)
-  (8, 1, 3.00, NOW(), NOW()), (8, 2, 3.00, NOW(), NOW()), (8, 3, 2.00, NOW(), NOW()),
-  (8, 7, 1.00, NOW(), NOW()), (8, 6, 2.00, NOW(), NOW()), (8, 5, 2.00, NOW(), NOW()),
-  (8, 4, 2.00, NOW(), NOW()),
-  (8, 8, 3.00, NOW(), NOW()), (8, 9, 4.00, NOW(), NOW()), (8, 10, 2.00, NOW(), NOW()),
-  (8, 26, 4.00, NOW(), NOW()), (8, 29, 2.00, NOW(), NOW()),
-
-  -- 9 Zidar (SPI)
-  (9, 1, 3.00, NOW(), NOW()), (9, 2, 3.00, NOW(), NOW()), (9, 3, 2.00, NOW(), NOW()),
-  (9, 7, 1.00, NOW(), NOW()), (9, 6, 2.00, NOW(), NOW()), (9, 5, 2.00, NOW(), NOW()),
-  (9, 4, 2.00, NOW(), NOW()),
-  (9, 8, 3.00, NOW(), NOW()), (9, 9, 4.00, NOW(), NOW()), (9, 10, 2.00, NOW(), NOW()),
-  (9, 27, 4.00, NOW(), NOW()), (9, 29, 2.00, NOW(), NOW()),
-
-  -- 10 Okoljevarstveni tehnik (SSI) – 1. letnik
-  (10, 1, 4.00, NOW(), NOW()), (10, 2, 3.00, NOW(), NOW()), (10, 3, 3.00, NOW(), NOW()),
-  (10, 7, 2.00, NOW(), NOW()), (10, 30, 3.00, NOW(), NOW()),
-  (10, 15, 2.00, NOW(), NOW()), (10, 16, 2.00, NOW(), NOW()), (10, 35, 2.00, NOW(), NOW()),
-  (10, 4, 3.00, NOW(), NOW()),
-  (10, 31, 5.00, NOW(), NOW()), (10, 32, 4.00, NOW(), NOW());
-
--- ─── Teachers ───────────────────────────────────────────────────────────────
 INSERT INTO "Teacher" (id, name, surname, email, "schoolId", "assignedHours", "createdAt", "updatedAt")
 VALUES
   (1, 'Majda', 'Drobnič', 'majda.drobnich@gradbena.si', 3, 18.00, NOW(), NOW()),
@@ -139,15 +436,20 @@ VALUES
 
 SELECT setval(pg_get_serial_sequence('"Teacher"', 'id'), (SELECT MAX(id) FROM "Teacher"));
 
--- ─── Assignments (teacher on ProgramSubject) ─────────────────────────────────
-UPDATE "ProgramSubject" SET "teacherId" = 1 WHERE "programId" = 1 AND "subjectId" = 1;
-
-UPDATE "ProgramSubject" SET "teacherId" = 2 WHERE ("programId", "subjectId") IN (
-  (1, 11), (1, 12), (1, 13), (4, 8), (3, 9), (4, 22), (5, 23), (9, 27)
+UPDATE "ProgramSubject" SET "teacherId" = 1 WHERE ("programId", "subjectId", "yearId") IN (
+  (1, 1, 1), (1, 1, 2), (1, 1, 3), (1, 1, 4)
 );
 
-UPDATE "ProgramSubject" SET "teacherId" = 3 WHERE ("programId", "subjectId") IN (
-  (1, 14), (6, 24), (7, 25), (8, 26), (10, 31), (10, 34), (10, 32), (2, 17), (2, 15)
+UPDATE "ProgramSubject" SET "teacherId" = 2 WHERE ("programId", "subjectId", "yearId") IN (
+  (1, 11, 1), (1, 12, 1), (1, 11, 2), (1, 12, 2), (1, 13, 2),
+  (4, 8, 1), (4, 22, 1), (5, 23, 1), (9, 27, 1)
+);
+
+UPDATE "ProgramSubject" SET "teacherId" = 3 WHERE ("programId", "subjectId", "yearId") IN (
+  (1, 14, 2), (1, 14, 3), (1, 14, 4),
+  (6, 24, 1), (7, 25, 1), (8, 26, 1),
+  (10, 31, 1), (10, 34, 2), (10, 32, 1), (2, 17, 1), (2, 15, 1)
 );
 
 COMMIT;
+

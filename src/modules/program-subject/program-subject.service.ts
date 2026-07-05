@@ -10,6 +10,11 @@ import { CreateProgramSubjectDto } from './dto/create-program-subject.dto';
 const programSubjectInclude = {
   subject: { omit: { schoolId: true } },
   program: { omit: { schoolId: true } },
+  programYear: {
+    include: {
+      year: true,
+    },
+  },
   teacher: { omit: { schoolId: true } },
 } as const satisfies Prisma.ProgramSubjectInclude;
 
@@ -34,15 +39,22 @@ export class ProgramSubjectsService {
     schoolId: number,
     data: CreateProgramSubjectDto,
   ): Promise<ProgramSubject> {
-    const { programId, subjectId, requiredHours } = data;
+    const { programId, subjectId, yearId, requiredHours } = data;
 
-    const [program, subject] = await Promise.all([
+    const [program, subject, programYear] = await Promise.all([
       this.prisma.program.findUnique({ where: { id: programId } }),
       this.prisma.subject.findUnique({ where: { id: subjectId } }),
+      this.prisma.programYear.findUnique({
+        where: { programId_yearId: { programId, yearId } },
+      }),
     ]);
 
     if (!program || !subject) {
       throw new NotFoundException('Program or subject not found');
+    }
+
+    if (!programYear) {
+      throw new NotFoundException('Program year not found');
     }
 
     if (program.schoolId !== schoolId || subject.schoolId !== schoolId) {
@@ -62,6 +74,7 @@ export class ProgramSubjectsService {
         requiredHours,
         program: { connect: { id: programId } },
         subject: { connect: { id: subjectId } },
+        programYear: { connect: { programId_yearId: { programId, yearId } } },
       },
     });
   }

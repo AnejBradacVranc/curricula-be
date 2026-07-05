@@ -4,10 +4,21 @@ import { PrismaService } from 'src/core/prisma/prisma.service';
 import { CreateProgramDto } from './dto/create-program.dto';
 
 const programInclude = {
+  programYears: {
+    omit: { programId: true },
+    include: {
+      year: true,
+    },
+  },
   programSubjects: {
     omit: { programId: true },
     include: {
       subject: { omit: { schoolId: true } },
+      programYear: {
+        include: {
+          year: true,
+        },
+      },
       teacher: { omit: { schoolId: true } },
     },
   },
