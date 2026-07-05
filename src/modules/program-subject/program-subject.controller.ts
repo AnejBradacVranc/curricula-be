@@ -5,7 +5,7 @@ import {
   ProgramSubjectsService,
   ProgramSubjectWithRelations,
 } from './program-subject.service';
-import { AuthenticatedUser } from '../auth/jwt.strategy';
+import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 
 @Controller()
 export class ProgramSubjectsController {

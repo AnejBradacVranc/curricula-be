@@ -6,7 +6,7 @@ import {
   AssignmentWithRelations,
 } from './assignment.service';
 import { DeleteAssignmentDto } from './dto/delete-assignment.dto';
-import { AuthenticatedUser } from '../auth/jwt.strategy';
+import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 
 @Controller()
 export class AssignmentsController {

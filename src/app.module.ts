@@ -12,7 +12,7 @@ import { SubjectsModule } from './modules/subject/subject.module';
 import { TeachersModule } from './modules/teacher/teacher.module';
 import { UsersModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
+import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -27,11 +27,11 @@ import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
     RouterModule.register([
       {
         path: 'schools',
-        module: SchoolsModule,        
+        module: SchoolsModule,
         children: [
           {
             path: ':schoolId/users',
-            module: UsersModule,            
+            module: UsersModule,
           },
           {
             path: ':schoolId/teachers',

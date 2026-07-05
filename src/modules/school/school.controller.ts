@@ -9,7 +9,7 @@ import {
 import { School } from 'generated/prisma/client';
 import { CreateSchoolDto } from './dto/create-school.dto';
 import { SchoolsService, SchoolWithRelations } from './school.service';
-import { AuthenticatedUser } from '../auth/jwt.strategy';
+import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 
 @Controller()
 export class SchoolsController {

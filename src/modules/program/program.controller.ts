@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Request } from '@nestjs/common';
 import { Program } from 'generated/prisma/client';
 import { CreateProgramDto } from './dto/create-program.dto';
 import { ProgramsService, ProgramWithRelations } from './program.service';
-import { AuthenticatedUser } from '../auth/jwt.strategy';
+import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 
 @Controller()
 export class ProgramsController {
