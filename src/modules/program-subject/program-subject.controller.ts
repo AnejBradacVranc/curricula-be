@@ -1,17 +1,11 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Request } from '@nestjs/common';
 import { ProgramSubject } from 'generated/prisma/client';
 import { CreateProgramSubjectDto } from './dto/create-program-subject.dto';
 import {
   ProgramSubjectsService,
   ProgramSubjectWithRelations,
 } from './program-subject.service';
+import { AuthenticatedUser } from '../auth/jwt.strategy';
 
 @Controller()
 export class ProgramSubjectsController {
@@ -21,18 +15,20 @@ export class ProgramSubjectsController {
 
   @Get()
   async getProgramSubjects(
-    @Param('schoolId', ParseIntPipe) schoolId: number,
+    @Request() req: { user: AuthenticatedUser },
   ): Promise<ProgramSubjectWithRelations[]> {
-    return this.programSubjectsService.programSubjectsBySchool(schoolId);
+    return this.programSubjectsService.programSubjectsBySchool(
+      req.user.schoolId,
+    );
   }
 
   @Post()
   async createProgramSubject(
-    @Param('schoolId', ParseIntPipe) schoolId: number,
+    @Request() req: { user: AuthenticatedUser },
     @Body() createProgramSubjectDto: CreateProgramSubjectDto,
   ): Promise<ProgramSubject> {
     return this.programSubjectsService.createProgramSubject(
-      schoolId,
+      req.user.schoolId,
       createProgramSubjectDto,
     );
   }

@@ -3,13 +3,13 @@ import {
   Controller,
   Get,
   NotFoundException,
-  Param,
-  ParseIntPipe,
   Post,
+  Request,
 } from '@nestjs/common';
 import { School } from 'generated/prisma/client';
 import { CreateSchoolDto } from './dto/create-school.dto';
 import { SchoolsService, SchoolWithRelations } from './school.service';
+import { AuthenticatedUser } from '../auth/jwt.strategy';
 
 @Controller()
 export class SchoolsController {
@@ -22,9 +22,9 @@ export class SchoolsController {
 
   @Get(':schoolId')
   async getSchool(
-    @Param('schoolId', ParseIntPipe) schoolId: number,
+    @Request() req: { user: AuthenticatedUser },
   ): Promise<SchoolWithRelations> {
-    const school = await this.schoolsService.school(schoolId);
+    const school = await this.schoolsService.school(req.user.schoolId);
     if (!school) {
       throw new NotFoundException('School not found');
     }

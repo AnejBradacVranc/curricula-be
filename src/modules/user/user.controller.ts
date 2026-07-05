@@ -1,15 +1,8 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Query, Request } from '@nestjs/common';
 import { User } from 'generated/prisma/client';
 import { FindUserByEmailDto } from './dto/find-user-by-email.dto';
 import { UsersService } from './user.service';
+import { AuthenticatedUser } from '../auth/jwt.strategy';
 
 @Controller()
 export class UsersController {
@@ -17,12 +10,12 @@ export class UsersController {
 
   @Get()
   async getUsers(
-    @Param('schoolId', ParseIntPipe) schoolId: number,
+    @Request() req: { user: AuthenticatedUser },
   ): Promise<User[]> {
-    return this.usersService.usersBySchool(schoolId);
+    return this.usersService.usersBySchool(req.user.schoolId);
   }
 
-  @Get()
+  @Get('by-email')
   async getUserByEmail(@Query() { email }: FindUserByEmailDto): Promise<User> {
     return this.usersService.userByEmail(email);
   }

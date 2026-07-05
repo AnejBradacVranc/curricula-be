@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request } from '@nestjs/common';
 import { Teacher } from 'generated/prisma/client';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { TeachersService } from './teacher.service';
+import { AuthenticatedUser } from '../auth/jwt.strategy';
 
 @Controller()
 export class TeachersController {
@@ -9,16 +10,19 @@ export class TeachersController {
 
   @Get()
   async getTeachers(
-    @Param('schoolId', ParseIntPipe) schoolId: number,
+    @Request() req: { user: AuthenticatedUser },
   ): Promise<Teacher[]> {
-    return this.teachersService.teachersBySchool(schoolId);
+    return this.teachersService.teachersBySchool(req.user.schoolId);
   }
 
   @Post()
   async createTeacher(
-    @Param('schoolId', ParseIntPipe) schoolId: number,
+    @Request() req: { user: AuthenticatedUser },
     @Body() createTeacherDto: CreateTeacherDto,
   ): Promise<Teacher> {
-    return this.teachersService.createTeacher(schoolId, createTeacherDto);
+    return this.teachersService.createTeacher(
+      req.user.schoolId,
+      createTeacherDto,
+    );
   }
 }

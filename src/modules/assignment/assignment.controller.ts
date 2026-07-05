@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Request } from '@nestjs/common';
 import { SubjectTeacher } from 'generated/prisma/client';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import {
@@ -14,6 +6,7 @@ import {
   AssignmentWithRelations,
 } from './assignment.service';
 import { DeleteAssignmentDto } from './dto/delete-assignment.dto';
+import { AuthenticatedUser } from '../auth/jwt.strategy';
 
 @Controller()
 export class AssignmentsController {
@@ -21,29 +14,29 @@ export class AssignmentsController {
 
   @Get()
   async getAssignments(
-    @Param('schoolId', ParseIntPipe) schoolId: number,
+    @Request() req: { user: AuthenticatedUser },
   ): Promise<AssignmentWithRelations[]> {
-    return this.assignmentsService.assignmentsBySchool(schoolId);
+    return this.assignmentsService.assignmentsBySchool(req.user.schoolId);
   }
 
   @Post()
   async createAssignment(
-    @Param('schoolId', ParseIntPipe) schoolId: number,
+    @Request() req: { user: AuthenticatedUser },
     @Body() createAssignmentDto: CreateAssignmentDto,
   ): Promise<SubjectTeacher> {
     return this.assignmentsService.createAssignment(
-      schoolId,
+      req.user.schoolId,
       createAssignmentDto,
     );
   }
 
   @Delete()
   async deleteAssignment(
-    @Param('schoolId', ParseIntPipe) schoolId: number,
+    @Request() req: { user: AuthenticatedUser },
     @Body() deleteAssignmentDto: DeleteAssignmentDto,
   ): Promise<void> {
     return this.assignmentsService.deleteAsignment(
-      schoolId,
+      req.user.schoolId,
       deleteAssignmentDto,
     );
   }
