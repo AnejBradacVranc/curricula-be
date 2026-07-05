@@ -5,6 +5,7 @@ import { RequestMethod } from '@nestjs/common/enums';
 import { ValidationPipe } from '@nestjs/common';
 import { PrismaExceptionFilter } from './core/filters/prismaException.filter';
 import { validationPipeOptions } from './core/validation/validationPipeOptions';
+import { TransformInterceptor } from './core/interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +18,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe(validationPipeOptions));
   app.useGlobalFilters(new PrismaExceptionFilter(httpAdapter));
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   await app.listen(process.env.PORT ?? 3000);
 }

@@ -30,27 +30,27 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
         module: SchoolsModule,
         children: [
           {
-            path: ':schoolId/users',
+            path: 'users',
             module: UsersModule,
           },
           {
-            path: ':schoolId/teachers',
+            path: 'teachers',
             module: TeachersModule,
           },
           {
-            path: ':schoolId/programs',
+            path: 'programs',
             module: ProgramsModule,
           },
           {
-            path: ':schoolId/subjects',
+            path: 'subjects',
             module: SubjectsModule,
           },
           {
-            path: ':schoolId/assignments',
+            path: 'assignments',
             module: AssignmentsModule,
           },
           {
-            path: ':schoolId/subject-to-program',
+            path: 'subject-to-program',
             module: ProgramSubjectsModule,
           },
         ],

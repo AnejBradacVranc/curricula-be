@@ -20,7 +20,7 @@ export class SchoolsController {
     return this.schoolsService.schools();
   }
 
-  @Get(':schoolId')
+  @Get('me')
   async getSchool(
     @Request() req: { user: AuthenticatedUser },
   ): Promise<SchoolWithRelations> {
