@@ -10,6 +10,7 @@ import { CreateProgramSubjectDto } from './dto/create-program-subject.dto';
 const programSubjectInclude = {
   subject: { omit: { schoolId: true } },
   program: { omit: { schoolId: true } },
+  teacher: { omit: { schoolId: true } },
 } as const satisfies Prisma.ProgramSubjectInclude;
 
 export type ProgramSubjectWithRelations = Prisma.ProgramSubjectGetPayload<{

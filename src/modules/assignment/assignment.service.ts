@@ -3,30 +3,85 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, SubjectTeacher } from 'generated/prisma/client';
+import { Prisma } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { DeleteAssignmentDto } from './dto/delete-assignment.dto';
 
-const assignmentInclude = {
+const programSubjectInclude = {
   subject: { omit: { schoolId: true } },
   teacher: { omit: { schoolId: true } },
-} as const satisfies Prisma.SubjectTeacherInclude;
+} as const satisfies Prisma.ProgramSubjectInclude;
 
-export type AssignmentWithRelations = Prisma.SubjectTeacherGetPayload<{
-  include: typeof assignmentInclude;
+export type AssignedProgramSubject = Prisma.ProgramSubjectGetPayload<{
+  include: typeof programSubjectInclude;
 }>;
 
 @Injectable()
 export class AssignmentsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async assignmentsBySchool(
+  async createAssignment(
     schoolId: number,
-  ): Promise<AssignmentWithRelations[]> {
-    return this.prisma.subjectTeacher.findMany({
-      where: { subject: { schoolId } },
-      include: assignmentInclude,
+    data: CreateAssignmentDto,
+  ): Promise<AssignedProgramSubject> {
+    const { subjectId, teacherId, programId } = data;
+
+    const [teacher, programSubject] = await Promise.all([
+      this.prisma.teacher.findFirst({
+        where: { id: teacherId, schoolId },
+      }),
+      this.prisma.programSubject.findFirst({
+        where: {
+          programId,
+          subjectId,
+          subject: { schoolId },
+          program: { schoolId },
+        },
+      }),
+    ]);
+
+    if (!teacher) {
+      throw new NotFoundException('Teacher not found for this school');
+    }
+
+    if (!programSubject) {
+      throw new BadRequestException(
+        'Relation between program and subject not found for this school',
+      );
+    }
+
+    if (programSubject.teacherId === teacherId) {
+      return this.prisma.programSubject.findUniqueOrThrow({
+        where: {
+          programId_subjectId: { programId, subjectId },
+        },
+        include: programSubjectInclude,
+      });
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      if (programSubject.teacherId) {
+        await tx.teacher.update({
+          where: { id: programSubject.teacherId },
+          data: { assignedHours: { decrement: programSubject.requiredHours } },
+        });
+      }
+
+      await tx.teacher.update({
+        where: { id: teacherId },
+        data: { assignedHours: { increment: programSubject.requiredHours } },
+      });
+
+      return tx.programSubject.update({
+        where: {
+          programId_subjectId: { programId, subjectId },
+        },
+        data: {
+          teacher: { connect: { id: teacherId } },
+        },
+        include: programSubjectInclude,
+      });
     });
   }
 
@@ -48,60 +103,23 @@ export class AssignmentsService {
       );
     }
 
+    if (programSubject.teacherId !== teacherId) {
+      throw new NotFoundException('Assignment not found for this program');
+    }
+
     return this.prisma.$transaction(async (tx) => {
-      await tx.subjectTeacher.delete({
+      await tx.programSubject.update({
         where: {
-          subjectId_teacherId: { subjectId, teacherId },
+          programId_subjectId: { programId, subjectId },
+        },
+        data: {
+          teacher: { disconnect: true },
         },
       });
 
       await tx.teacher.update({
         where: { id: teacherId },
         data: { assignedHours: { decrement: programSubject.requiredHours } },
-      });
-    });
-  }
-
-  async createAssignment(
-    schoolId: number,
-    data: CreateAssignmentDto,
-  ): Promise<SubjectTeacher> {
-    const { subjectId, teacherId, programId } = data;
-
-    const [teacher, programSubject] = await Promise.all([
-      this.prisma.teacher.findFirst({
-        where: { id: teacherId, schoolId },
-      }),
-      this.prisma.programSubject.findFirst({
-        where: {
-          programId,
-          subjectId,
-          subject: { schoolId: schoolId },
-          program: { schoolId: schoolId },
-        },
-      }),
-    ]);
-
-    if (!teacher) {
-      throw new NotFoundException('Teacher not found for this school');
-    }
-
-    if (!programSubject) {
-      throw new BadRequestException(
-        'Relation between program and subject not found for this school',
-      );
-    }
-
-    return this.prisma.$transaction(async (tx) => {
-      await tx.teacher.update({
-        where: { id: teacherId },
-        data: { assignedHours: { increment: programSubject.requiredHours } },
-      });
-      return tx.subjectTeacher.create({
-        data: {
-          subject: { connect: { id: subjectId } },
-          teacher: { connect: { id: teacherId } },
-        },
       });
     });
   }

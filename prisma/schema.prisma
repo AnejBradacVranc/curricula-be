@@ -37,7 +37,7 @@ model User {
   id       Int     @id @default(autoincrement())
   email    String  @unique
   name     String?
-  surname  String?  
+  surname  String?
   password String
   school   School  @relation(fields: [schoolId], references: [id])
   schoolId Int
@@ -52,7 +52,7 @@ model Program {
   name            String
   school          School           @relation(fields: [schoolId], references: [id])
   schoolId        Int
-  availableHours  Decimal @db.Decimal(8, 2)
+  availableHours  Decimal          @db.Decimal(8, 2)
   programSubjects ProgramSubject[]
 
   createdAt DateTime @default(now())
@@ -66,7 +66,6 @@ model Subject {
   name            String
   school          School           @relation(fields: [schoolId], references: [id])
   schoolId        Int
-  subjectTeachers SubjectTeacher[]
   programSubjects ProgramSubject[]
 
   createdAt DateTime @default(now())
@@ -76,26 +75,15 @@ model Subject {
 }
 
 model ProgramSubject {
-  program       Program @relation(fields: [programId], references: [id])
-  subject       Subject @relation(fields: [subjectId], references: [id])
+  program       Program  @relation(fields: [programId], references: [id])
+  subject       Subject  @relation(fields: [subjectId], references: [id])
+  teacher       Teacher? @relation(fields: [teacherId], references: [id])
   programId     Int
   subjectId     Int
-  requiredHours Decimal @db.Decimal(8, 2)
+  teacherId     Int?
+  requiredHours Decimal  @db.Decimal(8, 2)
 
   @@id([programId, subjectId])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-}
-
-model SubjectTeacher {
-  teacher       Teacher @relation(fields: [teacherId], references: [id])
-  subject       Subject @relation(fields: [subjectId], references: [id])
-  subjectId     Int
-  teacherId     Int
-  //assignedHours Int?
-
-  @@id([subjectId, teacherId])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -108,8 +96,8 @@ model Teacher {
   surname         String
   email           String           @unique
   schoolId        Int
-  subjectTeachers SubjectTeacher[]
-  assignedHours Decimal @default(0) @db.Decimal(8, 2)
+  programSubjects ProgramSubject[]
+  assignedHours   Decimal          @default(0) @db.Decimal(8, 2)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
