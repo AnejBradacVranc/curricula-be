@@ -1,34 +1,20 @@
-import { Body, Controller, Post, UnauthorizedException } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { LoginUserDto } from './dto/login.dto';
-import { UsersService } from '../user/user.service';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import { AuthService, UserNoPassword } from './auth.service';
 import { RegisterUserDto } from './dto/register.dto';
-import { User } from 'generated/prisma/client';
+import { LocalAuthGuard } from './local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
+  @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Body() loginUserDto: LoginUserDto) {
-    const { email, pass } = loginUserDto;
-
-    const user = await this.usersService.userByEmail(email);
-
-    const isValid = await this.authService.validatPassword(user.password, pass);
-
-    if (isValid) {
-      return await this.authService.loginUser(user);
-    }
-
-    throw new UnauthorizedException('Invalid user credentials');
+  login(@Request() req: { user: UserNoPassword }) {
+    return this.authService.loginUser(req.user);
   }
 
-  @Post()
-  async register(@Body() createUserDto: RegisterUserDto): Promise<User> {
-    return this.authService.registerUser(createUserDto);
+  @Post('register')
+  register(@Body() registerUserDto: RegisterUserDto) {
+    return this.authService.registerUser(registerUserDto);
   }
 }
