@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Post, Request } from '@nestjs/common';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import {
-  AssignedProgramSubject,
+  AssignedClassSubject,
   AssignmentsService,
 } from './assignment.service';
 import { DeleteAssignmentDto } from './dto/delete-assignment.dto';
@@ -15,7 +15,7 @@ export class AssignmentsController {
   async createAssignment(
     @Request() req: { user: AuthenticatedUser },
     @Body() createAssignmentDto: CreateAssignmentDto,
-  ): Promise<AssignedProgramSubject> {
+  ): Promise<AssignedClassSubject> {
     return this.assignmentsService.createAssignment(
       req.user.schoolId,
       createAssignmentDto,

@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Post, Request } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Request } from '@nestjs/common';
 import { Program } from 'generated/prisma/client';
 import { CreateProgramDto } from './dto/create-program.dto';
 import { ProgramsService, ProgramWithRelations } from './program.service';
 import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
+import { ProgramByClassDto } from './dto/program-by-class.dto';
+import { GetProgramsQueryDto } from './dto/get-program.dto';
 
 @Controller()
 export class ProgramsController {
@@ -11,8 +13,9 @@ export class ProgramsController {
   @Get()
   async getPrograms(
     @Request() req: { user: AuthenticatedUser },
-  ): Promise<ProgramWithRelations[]> {
-    return this.programsService.programsBySchool(req.user.schoolId);
+    //@Query() params: GetProgramsQueryDto,
+  ): Promise<ProgramWithRelations[] | ProgramByClassDto[]> {
+    return await this.programsService.programsBySchool(req.user.schoolId);
   }
 
   @Post()

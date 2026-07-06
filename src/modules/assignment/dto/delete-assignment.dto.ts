@@ -4,6 +4,10 @@ import { IsInt, Min } from 'class-validator';
 export class DeleteAssignmentDto {
   @Type(() => Number)
   @IsInt()
+  classId: number;
+
+  @Type(() => Number)
+  @IsInt()
   subjectId: number;
 
   @Type(() => Number)

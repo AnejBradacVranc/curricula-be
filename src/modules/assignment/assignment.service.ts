@@ -8,18 +8,27 @@ import { PrismaService } from 'src/core/prisma/prisma.service';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { DeleteAssignmentDto } from './dto/delete-assignment.dto';
 
-const programSubjectInclude = {
-  subject: { omit: { schoolId: true } },
-  programYear: {
+const assignmentInclude = {
+  class: {
     include: {
-      year: true,
+      label: true,
+      programYear: {
+        include: {
+          year: true,
+        },
+      },
+    },
+  },
+  programSubject: {
+    include: {
+      subject: { omit: { schoolId: true } },
     },
   },
   teacher: { omit: { schoolId: true } },
-} as const satisfies Prisma.ProgramSubjectInclude;
+} as const satisfies Prisma.ClassSubjectAssignmentInclude;
 
-export type AssignedProgramSubject = Prisma.ProgramSubjectGetPayload<{
-  include: typeof programSubjectInclude;
+export type AssignedClassSubject = Prisma.ClassSubjectAssignmentGetPayload<{
+  include: typeof assignmentInclude;
 }>;
 
 @Injectable()
@@ -29,10 +38,10 @@ export class AssignmentsService {
   async createAssignment(
     schoolId: number,
     data: CreateAssignmentDto,
-  ): Promise<AssignedProgramSubject> {
-    const { subjectId, teacherId, programId, yearId } = data;
+  ): Promise<AssignedClassSubject> {
+    const { classId, subjectId, teacherId, programId, yearId } = data;
 
-    const [teacher, programSubject] = await Promise.all([
+    const [teacher, programSubject, classRoom] = await Promise.all([
       this.prisma.teacher.findFirst({
         where: { id: teacherId, schoolId },
       }),
@@ -42,6 +51,14 @@ export class AssignmentsService {
           subjectId,
           yearId,
           subject: { schoolId },
+          program: { schoolId },
+        },
+      }),
+      this.prisma.class.findFirst({
+        where: {
+          id: classId,
+          programId,
+          yearId,
           program: { schoolId },
         },
       }),
@@ -57,20 +74,41 @@ export class AssignmentsService {
       );
     }
 
-    if (programSubject.teacherId === teacherId) {
-      return this.prisma.programSubject.findUniqueOrThrow({
-        where: {
-          programId_subjectId_yearId: { programId, subjectId, yearId },
+    if (!classRoom) {
+      throw new NotFoundException('Class not found for this program and year');
+    }
+
+    const existing = await this.prisma.classSubjectAssignment.findUnique({
+      where: {
+        classId_programId_subjectId_yearId: {
+          classId,
+          programId,
+          subjectId,
+          yearId,
         },
-        include: programSubjectInclude,
-      });
+      },
+      include: assignmentInclude,
+    });
+
+    if (existing?.teacherId === teacherId) {
+      return existing;
     }
 
     return this.prisma.$transaction(async (tx) => {
-      if (programSubject.teacherId) {
+      if (existing) {
         await tx.teacher.update({
-          where: { id: programSubject.teacherId },
+          where: { id: existing.teacherId },
           data: { assignedHours: { decrement: programSubject.requiredHours } },
+        });
+        await tx.classSubjectAssignment.delete({
+          where: {
+            classId_programId_subjectId_yearId: {
+              classId,
+              programId,
+              subjectId,
+              yearId,
+            },
+          },
         });
       }
 
@@ -79,54 +117,61 @@ export class AssignmentsService {
         data: { assignedHours: { increment: programSubject.requiredHours } },
       });
 
-      return tx.programSubject.update({
-        where: {
-          programId_subjectId_yearId: { programId, subjectId, yearId },
-        },
+      return tx.classSubjectAssignment.create({
         data: {
+          class: { connect: { id: classId } },
+          programSubject: {
+            connect: {
+              programId_subjectId_yearId: { programId, subjectId, yearId },
+            },
+          },
           teacher: { connect: { id: teacherId } },
         },
-        include: programSubjectInclude,
+        include: assignmentInclude,
       });
     });
   }
 
   async deleteAsignment(schoolId: number, data: DeleteAssignmentDto) {
-    const { subjectId, teacherId, programId, yearId } = data;
+    const { classId, subjectId, teacherId, programId, yearId } = data;
 
-    const programSubject = await this.prisma.programSubject.findFirst({
+    const assignment = await this.prisma.classSubjectAssignment.findFirst({
       where: {
+        classId,
         programId,
         subjectId,
         yearId,
-        subject: { schoolId },
-        program: { schoolId },
+        teacherId,
+        class: { program: { schoolId } },
+      },
+      include: {
+        programSubject: true,
       },
     });
 
-    if (!programSubject) {
-      throw new BadRequestException(
-        'Relation between program and subject not found for this school',
-      );
-    }
-
-    if (programSubject.teacherId !== teacherId) {
-      throw new NotFoundException('Assignment not found for this program');
+    if (!assignment) {
+      throw new NotFoundException('Assignment not found for this class');
     }
 
     return this.prisma.$transaction(async (tx) => {
-      await tx.programSubject.update({
+      await tx.classSubjectAssignment.delete({
         where: {
-          programId_subjectId_yearId: { programId, subjectId, yearId },
-        },
-        data: {
-          teacher: { disconnect: true },
+          classId_programId_subjectId_yearId: {
+            classId,
+            programId,
+            subjectId,
+            yearId,
+          },
         },
       });
 
       await tx.teacher.update({
         where: { id: teacherId },
-        data: { assignedHours: { decrement: programSubject.requiredHours } },
+        data: {
+          assignedHours: {
+            decrement: assignment.programSubject.requiredHours,
+          },
+        },
       });
     });
   }

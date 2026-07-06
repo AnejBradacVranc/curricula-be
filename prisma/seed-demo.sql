@@ -13,7 +13,7 @@ ON CONFLICT (name) DO UPDATE SET "updatedAt" = NOW();
 
 SELECT setval(pg_get_serial_sequence('"Year"', 'id'), (SELECT MAX(id) FROM "Year"));
 
-TRUNCATE "ProgramSubject", "ProgramYear", "Subject", "Program", "Teacher" RESTART IDENTITY CASCADE;
+TRUNCATE "ClassSubjectAssignment", "Class", "ClassLabel", "ProgramSubject", "ProgramYear", "Subject", "Program", "Teacher" RESTART IDENTITY CASCADE;
 
 INSERT INTO "Program" (id, name, "schoolId", "availableHours", "createdAt", "updatedAt")
 VALUES
@@ -42,6 +42,30 @@ VALUES
   (8, 1, 33, NOW(), NOW()), (8, 2, 33, NOW(), NOW()), (8, 3, 16, NOW(), NOW()),
   (9, 1, 33, NOW(), NOW()), (9, 2, 33, NOW(), NOW()), (9, 3, 16, NOW(), NOW()),
   (10, 1, 35, NOW(), NOW()), (10, 2, 31, NOW(), NOW()), (10, 3, 31, NOW(), NOW()), (10, 4, 34, NOW(), NOW());
+
+
+INSERT INTO "ClassLabel" (id, label)
+VALUES
+  (1, 'a'), (2, 'b'), (3, 'c'),
+  (4, 'bt'), (5, 'at'), (6, 'cr'), (7, 'gr'), (8, 'tr')
+ON CONFLICT (label) DO UPDATE SET label = EXCLUDED.label;
+
+SELECT setval(pg_get_serial_sequence('"ClassLabel"', 'id'), (SELECT MAX(id) FROM "ClassLabel"));
+
+INSERT INTO "Class" ("programId", "yearId", "labelId")
+VALUES
+  (1, 1, 1), (1, 1, 2), (1, 1, 3),
+  (1, 2, 1), (1, 2, 2), (1, 3, 1), (1, 3, 2), (1, 4, 1), (1, 4, 2),
+  (2, 1, 1), (2, 1, 2),
+  (3, 1, 1), (3, 1, 2), (3, 2, 1), (3, 2, 2),
+  (4, 1, 4), (4, 1, 5), (4, 2, 4), (4, 2, 5), (4, 3, 4), (4, 3, 5),
+  (5, 1, 4), (5, 1, 5), (5, 2, 4), (5, 2, 5), (5, 3, 4), (5, 3, 5),
+  (6, 1, 4), (6, 1, 5), (6, 2, 4), (6, 2, 5), (6, 3, 4), (6, 3, 5),
+  (7, 1, 4), (7, 1, 5), (7, 2, 4), (7, 2, 5), (7, 3, 4), (7, 3, 5),
+  (8, 1, 4), (8, 1, 5), (8, 2, 4), (8, 2, 5), (8, 3, 4), (8, 3, 5),
+  (9, 1, 4), (9, 1, 5), (9, 2, 4), (9, 2, 5), (9, 3, 4), (9, 3, 5),
+  (10, 1, 1), (10, 1, 2), (10, 1, 3),
+  (10, 2, 1), (10, 2, 2), (10, 3, 1), (10, 3, 2), (10, 4, 1), (10, 4, 2);
 
 INSERT INTO "Subject" (id, name, "schoolId", "createdAt", "updatedAt")
 VALUES
@@ -436,20 +460,21 @@ VALUES
 
 SELECT setval(pg_get_serial_sequence('"Teacher"', 'id'), (SELECT MAX(id) FROM "Teacher"));
 
-UPDATE "ProgramSubject" SET "teacherId" = 1 WHERE ("programId", "subjectId", "yearId") IN (
-  (1, 1, 1), (1, 1, 2), (1, 1, 3), (1, 1, 4)
-);
 
-UPDATE "ProgramSubject" SET "teacherId" = 2 WHERE ("programId", "subjectId", "yearId") IN (
-  (1, 11, 1), (1, 12, 1), (1, 11, 2), (1, 12, 2), (1, 13, 2),
-  (4, 8, 1), (4, 22, 1), (5, 23, 1), (9, 27, 1)
-);
-
-UPDATE "ProgramSubject" SET "teacherId" = 3 WHERE ("programId", "subjectId", "yearId") IN (
-  (1, 14, 2), (1, 14, 3), (1, 14, 4),
-  (6, 24, 1), (7, 25, 1), (8, 26, 1),
-  (10, 31, 1), (10, 34, 2), (10, 32, 1), (2, 17, 1), (2, 15, 1)
-);
+-- ─── Class subject assignments (teacher → class + subject) ───────────────────
+INSERT INTO "ClassSubjectAssignment" ("classId", "programId", "subjectId", "yearId", "teacherId")
+SELECT c.id, v.p, v.s, v.y, v.t
+FROM (VALUES
+  (1, 1, 1, 1), (1, 1, 2, 1), (1, 1, 3, 1), (1, 1, 4, 1),
+  (1, 11, 1, 2), (1, 12, 1, 2), (1, 11, 2, 2), (1, 12, 2, 2), (1, 13, 2, 2),
+  (4, 8, 1, 2), (4, 22, 1, 2), (5, 23, 1, 2), (9, 27, 1, 2),
+  (1, 14, 2, 3), (1, 14, 3, 3), (1, 14, 4, 3),
+  (6, 24, 1, 3), (7, 25, 1, 3), (8, 26, 1, 3),
+  (10, 31, 1, 3), (10, 34, 2, 3), (10, 32, 1, 3), (2, 17, 1, 3), (2, 15, 1, 3)
+) AS v(p, s, y, t)
+JOIN "Class" c ON c."programId" = v.p AND c."yearId" = v.y
+JOIN "ClassLabel" l ON l.id = c."labelId"
+  AND l.label = CASE WHEN v.p IN (4,5,6,7,8,9) THEN 'bt' ELSE 'a' END;
 
 COMMIT;
 

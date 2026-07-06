@@ -15,7 +15,12 @@ const programSubjectInclude = {
       year: true,
     },
   },
-  teacher: { omit: { schoolId: true } },
+  assignments: {
+    include: {
+      class: { include: { label: true } },
+      teacher: { omit: { schoolId: true } },
+    },
+  },
 } as const satisfies Prisma.ProgramSubjectInclude;
 
 export type ProgramSubjectWithRelations = Prisma.ProgramSubjectGetPayload<{

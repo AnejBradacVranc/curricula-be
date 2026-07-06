@@ -64,12 +64,34 @@ model Program {
   availableHours  Decimal          @db.Decimal(8, 2)
   programYears    ProgramYear[]
   programSubjects ProgramSubject[]
+  classes Class[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
   @@unique([schoolId, name])
 }
+
+//department albels a, b, c, d, e, f, cr, gr, tr...etc
+model ClassLabel {
+  id    Int    @id @default(autoincrement())
+  label String @unique // "a", "b", "c"
+  classes Class[]
+}
+
+model Class {
+  id        Int @id @default(autoincrement())
+  programId Int
+  yearId    Int
+  labelId   Int
+
+  program     Program     @relation(fields: [programId], references: [id])
+  programYear ProgramYear @relation(fields: [programId, yearId], references: [programId, yearId])
+  label       ClassLabel  @relation(fields: [labelId], references: [id])
+  assignments ClassSubjectAssignment[]
+  @@unique([ programId, yearId, labelId])
+}
+
 
 model ProgramYear {
   program         Program          @relation(fields: [programId], references: [id])
@@ -78,6 +100,7 @@ model ProgramYear {
   yearId          Int
   numWeeks        Int
   programSubjects ProgramSubject[]
+  classes Class[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -102,12 +125,12 @@ model ProgramSubject {
   program       Program     @relation(fields: [programId], references: [id])
   subject       Subject     @relation(fields: [subjectId], references: [id])
   programYear   ProgramYear @relation(fields: [programId, yearId], references: [programId, yearId])
-  teacher       Teacher?    @relation(fields: [teacherId], references: [id])
+  assignments ClassSubjectAssignment[]
+  
+  requiredHours Decimal     @db.Decimal(8, 2)
   programId     Int
   subjectId     Int
   yearId        Int
-  teacherId     Int?
-  requiredHours Decimal     @db.Decimal(8, 2)
 
   @@id([programId, subjectId, yearId])
 
@@ -115,15 +138,29 @@ model ProgramSubject {
   updatedAt DateTime @default(now())
 }
 
+model ClassSubjectAssignment {
+  classId   Int
+  programId Int
+  subjectId Int
+  yearId    Int
+  teacherId Int
+
+  class          Class          @relation(fields: [classId], references: [id])
+  programSubject ProgramSubject @relation(fields: [programId, subjectId, yearId], references: [programId,subjectId,yearId])
+  teacher        Teacher        @relation(fields: [teacherId], references: [id])
+  @@id([classId, programId, subjectId, yearId])
+}
+
 model Teacher {
   id              Int              @id @default(autoincrement())
-  school          School           @relation(fields: [schoolId], references: [id])
+  school          School           @relation(fields: [schoolId], references: [id])  
   name            String
   surname         String
   email           String           @unique
-  schoolId        Int
-  programSubjects ProgramSubject[]
+  schoolId        Int  
   assignedHours   Decimal          @default(0) @db.Decimal(8, 2)
+
+  assignments ClassSubjectAssignment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())

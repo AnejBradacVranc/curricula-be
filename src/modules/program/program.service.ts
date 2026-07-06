@@ -8,6 +8,11 @@ const programInclude = {
     omit: { programId: true },
     include: {
       year: true,
+      classes: {
+        include: {
+          label: true,
+        },
+      },
     },
   },
   programSubjects: {
@@ -19,7 +24,12 @@ const programInclude = {
           year: true,
         },
       },
-      teacher: { omit: { schoolId: true } },
+      assignments: {
+        include: {
+          class: { include: { label: true } },
+          teacher: { omit: { schoolId: true } },
+        },
+      },
     },
   },
 } as const satisfies Prisma.ProgramInclude;
