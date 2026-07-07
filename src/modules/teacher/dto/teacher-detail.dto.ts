@@ -37,6 +37,7 @@ export const teacherDetailSelect = {
   },
   additionalActivityAssignments: {
     select: {
+      additionalActivityId: true,
       hoursAmount: true,
       additionalActivity: { select: { name: true } },
     },
