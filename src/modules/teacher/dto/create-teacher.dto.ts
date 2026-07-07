@@ -15,7 +15,7 @@ export class CreateTeacherDto {
   email: string;
 
   @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
+  @IsNumber({ maxDecimalPlaces: 4 })
   @IsNotEmpty()
   assignedHours: number;
 }
