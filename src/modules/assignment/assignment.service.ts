@@ -53,6 +53,7 @@ export class AssignmentsService {
           subject: { schoolId },
           program: { schoolId },
         },
+        include: { programYear: true },
       }),
       this.prisma.class.findFirst({
         where: {
@@ -78,6 +79,10 @@ export class AssignmentsService {
       throw new NotFoundException('Class not found for this program and year');
     }
 
+    const amount =
+      (Number(programSubject.requiredHours) / 35) *
+      programSubject.programYear.numWeeks;
+
     const existing = await this.prisma.classSubjectAssignment.findUnique({
       where: {
         classId_programId_subjectId_yearId: {
@@ -98,7 +103,7 @@ export class AssignmentsService {
       if (existing) {
         await tx.teacher.update({
           where: { id: existing.teacherId },
-          data: { assignedHours: { decrement: programSubject.requiredHours } },
+          data: { assignedHours: { decrement: amount } },
         });
         await tx.classSubjectAssignment.delete({
           where: {
@@ -114,7 +119,7 @@ export class AssignmentsService {
 
       await tx.teacher.update({
         where: { id: teacherId },
-        data: { assignedHours: { increment: programSubject.requiredHours } },
+        data: { assignedHours: { increment: amount } },
       });
 
       return tx.classSubjectAssignment.create({
@@ -145,13 +150,19 @@ export class AssignmentsService {
         class: { program: { schoolId } },
       },
       include: {
-        programSubject: true,
+        programSubject: {
+          include: { programYear: true },
+        },
       },
     });
 
     if (!assignment) {
       throw new NotFoundException('Assignment not found for this class');
     }
+
+    const amount =
+      (Number(assignment.programSubject.requiredHours) / 35) *
+      assignment.programSubject.programYear.numWeeks;
 
     return this.prisma.$transaction(async (tx) => {
       await tx.classSubjectAssignment.delete({
@@ -169,7 +180,7 @@ export class AssignmentsService {
         where: { id: teacherId },
         data: {
           assignedHours: {
-            decrement: assignment.programSubject.requiredHours,
+            decrement: amount,
           },
         },
       });
