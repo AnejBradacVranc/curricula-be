@@ -8,7 +8,7 @@ import { PrismaService } from 'src/core/prisma/prisma.service';
 import { CreateProgramSubjectDto } from './dto/create-program-subject.dto';
 
 const programSubjectInclude = {
-  subject: { omit: { schoolId: true } },
+  subject: { omit: { schoolId: true }, include: { category: true } },
   program: { omit: { schoolId: true } },
   programYear: {
     include: {

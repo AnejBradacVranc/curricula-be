@@ -8,6 +8,7 @@ import { AssignmentsModule } from './modules/assignment/assignment.module';
 import { ProgramSubjectsModule } from './modules/program-subject/program-subject.module';
 import { ProgramsModule } from './modules/program/program.module';
 import { YearsModule } from './modules/year/year.module';
+import { CategoriesModule } from './modules/category/category.module';
 import { SchoolsModule } from './modules/school/school.module';
 import { SubjectsModule } from './modules/subject/subject.module';
 import { TeachersModule } from './modules/teacher/teacher.module';
@@ -26,6 +27,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     ProgramsModule,
     ProgramSubjectsModule,
     YearsModule,
+    CategoriesModule,
     RouterModule.register([
       {
         path: 'schools',
@@ -58,6 +60,10 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
           {
             path: 'years',
             module: YearsModule,
+          },
+          {
+            path: 'categories',
+            module: CategoriesModule,
           },
         ],
       },

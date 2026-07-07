@@ -18,7 +18,7 @@ const programInclude = {
   programSubjects: {
     omit: { programId: true },
     include: {
-      subject: { omit: { schoolId: true } },
+      subject: { omit: { schoolId: true }, include: { category: true } },
       programYear: {
         include: {
           year: true,

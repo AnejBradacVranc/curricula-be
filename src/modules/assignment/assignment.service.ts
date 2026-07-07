@@ -21,7 +21,7 @@ const assignmentInclude = {
   },
   programSubject: {
     include: {
-      subject: { omit: { schoolId: true } },
+      subject: { omit: { schoolId: true }, include: { category: true } },
     },
   },
   teacher: { omit: { schoolId: true } },

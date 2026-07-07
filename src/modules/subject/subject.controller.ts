@@ -1,7 +1,9 @@
 import { Body, Controller, Get, Post, Request } from '@nestjs/common';
-import { Subject } from 'generated/prisma/client';
 import { CreateSubjectDto } from './dto/create-subject.dto';
-import { SubjectsService } from './subject.service';
+import {
+  SubjectWithCategory,
+  SubjectsService,
+} from './subject.service';
 import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 
 @Controller()
@@ -11,7 +13,7 @@ export class SubjectsController {
   @Get()
   async getSubjects(
     @Request() req: { user: AuthenticatedUser },
-  ): Promise<Subject[]> {
+  ): Promise<SubjectWithCategory[]> {
     return this.subjectsService.subjectsBySchool(req.user.schoolId);
   }
 
@@ -19,7 +21,7 @@ export class SubjectsController {
   async createSubject(
     @Request() req: { user: AuthenticatedUser },
     @Body() createSubjectDto: CreateSubjectDto,
-  ): Promise<Subject> {
+  ): Promise<SubjectWithCategory> {
     return this.subjectsService.createSubject(
       req.user.schoolId,
       createSubjectDto,

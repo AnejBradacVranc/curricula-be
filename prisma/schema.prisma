@@ -108,11 +108,19 @@ model ProgramYear {
   @@id([programId, yearId])
 }
 
+model Category{
+  id Int @id @default(autoincrement())
+  name String @unique
+  subjects Subject[]
+}
+
 model Subject {
   id              Int              @id @default(autoincrement())
   name            String
   school          School           @relation(fields: [schoolId], references: [id])
+  category        Category @relation(fields: [categoryId], references: [id])
   schoolId        Int
+  categoryId      Int
   programSubjects ProgramSubject[]
 
   createdAt DateTime @default(now())
