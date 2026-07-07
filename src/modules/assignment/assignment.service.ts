@@ -5,6 +5,10 @@ import {
 } from '@nestjs/common';
 import { Prisma } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
+import {
+  syncTeacherTotalHours,
+  teacherAssignmentHours,
+} from '../teacher/teacher-hours.util';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { DeleteAssignmentDto } from './dto/delete-assignment.dto';
 
@@ -79,9 +83,10 @@ export class AssignmentsService {
       throw new NotFoundException('Class not found for this program and year');
     }
 
-    const amount =
-      (Number(programSubject.requiredHours) / 35) *
-      programSubject.programYear.numWeeks;
+    const amount = teacherAssignmentHours(
+      programSubject.requiredHours,
+      programSubject.programYear.numWeeks,
+    );
 
     const existing = await this.prisma.classSubjectAssignment.findUnique({
       where: {
@@ -101,10 +106,17 @@ export class AssignmentsService {
 
     return this.prisma.$transaction(async (tx) => {
       if (existing) {
+        const previousAmount = teacherAssignmentHours(
+          programSubject.requiredHours,
+          programSubject.programYear.numWeeks,
+        );
+
         await tx.teacher.update({
           where: { id: existing.teacherId },
-          data: { assignedHours: { decrement: amount } },
+          data: { assignedHours: { decrement: previousAmount } },
         });
+        await syncTeacherTotalHours(tx, existing.teacherId);
+
         await tx.classSubjectAssignment.delete({
           where: {
             classId_programId_subjectId_yearId: {
@@ -121,6 +133,7 @@ export class AssignmentsService {
         where: { id: teacherId },
         data: { assignedHours: { increment: amount } },
       });
+      await syncTeacherTotalHours(tx, teacherId);
 
       return tx.classSubjectAssignment.create({
         data: {
@@ -160,9 +173,10 @@ export class AssignmentsService {
       throw new NotFoundException('Assignment not found for this class');
     }
 
-    const amount =
-      (Number(assignment.programSubject.requiredHours) / 35) *
-      assignment.programSubject.programYear.numWeeks;
+    const amount = teacherAssignmentHours(
+      assignment.programSubject.requiredHours,
+      assignment.programSubject.programYear.numWeeks,
+    );
 
     return this.prisma.$transaction(async (tx) => {
       await tx.classSubjectAssignment.delete({
@@ -184,6 +198,8 @@ export class AssignmentsService {
           },
         },
       });
+
+      await syncTeacherTotalHours(tx, teacherId);
     });
   }
 }

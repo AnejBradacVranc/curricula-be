@@ -7,6 +7,8 @@ export const teacherDetailSelect = {
   email: true,
   schoolId: true,
   assignedHours: true,
+  additionalActivityHours: true,
+  totalHours: true,
   assignments: {
     select: {
       class: {
@@ -31,6 +33,12 @@ export const teacherDetailSelect = {
           },
         },
       },
+    },
+  },
+  additionalActivityAssignments: {
+    select: {
+      hoursAmount: true,
+      additionalActivity: { select: { name: true } },
     },
   },
 } as const satisfies Prisma.TeacherSelect;

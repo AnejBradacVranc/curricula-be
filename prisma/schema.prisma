@@ -18,6 +18,23 @@ enum Role {
   ADMIN
 }
 
+model AdditionalActivities {
+  id Int @id @default(autoincrement())
+  name String //Razrednistvo, Informatika, Matura, OIV, PUT
+  additionalTeacherAssignments AdditionalTeacherAssignment[]
+}
+
+model AdditionalTeacherAssignment{
+  teacher     Teacher     @relation(fields: [teacherId], references: [id])
+  additionalActivity    AdditionalActivities     @relation(fields: [additionalActivityId], references: [id])
+
+  teacherId Int
+  additionalActivityId Int
+  hoursAmount Decimal @default(0) @db.Decimal(8, 4)
+
+  @@id([teacherId, additionalActivityId])
+}
+
 model School {
   id       Int        @id @default(autoincrement())
   name     String     @unique
@@ -167,6 +184,10 @@ model Teacher {
   email           String           @unique
   schoolId        Int  
   assignedHours   Decimal          @default(0) @db.Decimal(8, 4)
+  additionalHours Decimal @default(0) @db.Decimal(8, 4) 
+  totalHours Decimal @default(0) @db.Decimal(8, 4)
+
+  additionalActivityAssignments AdditionalTeacherAssignment[]
 
   assignments ClassSubjectAssignment[]
 

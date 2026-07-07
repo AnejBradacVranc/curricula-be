@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Teacher } from 'generated/prisma/client';
+import { Prisma, Teacher } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import {
@@ -14,6 +14,7 @@ export class TeachersService {
   async teachersBySchool(schoolId: number): Promise<Teacher[]> {
     return this.prisma.teacher.findMany({
       where: { schoolId },
+      orderBy: [{ name: 'asc' }, { surname: 'asc' }],
     });
   }
 
@@ -31,9 +32,14 @@ export class TeachersService {
     schoolId: number,
     data: CreateTeacherDto,
   ): Promise<Teacher> {
+    const assignedHours = new Prisma.Decimal(data.assignedHours);
+
     return this.prisma.teacher.create({
       data: {
         ...data,
+        assignedHours,
+        additionalActivityHours: 0,
+        totalHours: assignedHours,
         school: { connect: { id: schoolId } },
       },
     });
