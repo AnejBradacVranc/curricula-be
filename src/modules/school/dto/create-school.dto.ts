@@ -7,6 +7,10 @@ export class CreateSchoolDto {
 
   @IsOptional()
   @IsString()
+  logo?: string;
+
+  @IsOptional()
+  @IsString()
   tel?: string;
 
   @IsOptional()

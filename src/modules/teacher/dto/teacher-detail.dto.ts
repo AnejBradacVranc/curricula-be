@@ -6,6 +6,7 @@ export const teacherDetailSelect = {
   surname: true,
   email: true,
   schoolId: true,
+  color: true,
   assignedHours: true,
   additionalActivityHours: true,
   totalHours: true,
@@ -28,6 +29,7 @@ export const teacherDetailSelect = {
           subject: {
             select: {
               name: true,
+              abbrevation: true,
               category: { select: { name: true } },
             },
           },

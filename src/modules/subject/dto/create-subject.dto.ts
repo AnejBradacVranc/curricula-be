@@ -10,4 +10,8 @@ export class CreateSubjectDto {
   @IsInt()
   @IsNotEmpty()
   categoryId: number;
+
+  @IsString()
+  @IsNotEmpty()
+  abbrevation: string;
 }
