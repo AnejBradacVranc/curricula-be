@@ -79,7 +79,6 @@ model Program {
   name            String
   school          School           @relation(fields: [schoolId], references: [id])
   schoolId        Int
-  availableHours  Decimal          @db.Decimal(8, 4)
   programYears    ProgramYear[]
   programSubjects ProgramSubject[]
   classes Class[]

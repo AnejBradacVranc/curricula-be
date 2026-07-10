@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Post, Query, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+  Request,
+} from '@nestjs/common';
 import { Program } from 'generated/prisma/client';
 import { CreateProgramDto } from './dto/create-program.dto';
 import { ProgramsService, ProgramWithRelations } from './program.service';
@@ -16,6 +25,22 @@ export class ProgramsController {
     //@Query() params: GetProgramsQueryDto,
   ): Promise<ProgramWithRelations[] /*| ProgramByClassDto[]*/> {
     return await this.programsService.programsBySchool(req.user.schoolId);
+  }
+
+  @Get(':id')
+  async getProgram(
+    @Request() req: { user: AuthenticatedUser },
+    @Param('id') id: number,
+  ): Promise<ProgramWithRelations | null> {
+    return this.programsService.programById(req.user.schoolId, id);
+  }
+
+  @Delete(':id')
+  async deleteProgram(
+    @Request() req: { user: AuthenticatedUser },
+    @Param('id') id: number,
+  ): Promise<Program | null> {
+    return this.programsService.deleteProgram(req.user.schoolId, id);
   }
 
   @Post()

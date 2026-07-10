@@ -1,4 +1,4 @@
-import { HttpAdapterHost, NestFactory, RouterModule } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import 'dotenv/config';
 import { AppModule } from './app.module';
 import { RequestMethod } from '@nestjs/common/enums';

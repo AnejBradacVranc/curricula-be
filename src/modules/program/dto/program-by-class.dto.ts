@@ -44,6 +44,5 @@ export type SubjectGroupDto = {
 export type ProgramByClassDto = {
   id: number;
   name: string;
-  availableHours: number;
   subjectsByClassByYear: SubjectGroupDto[];
 };

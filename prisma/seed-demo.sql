@@ -15,18 +15,18 @@ SELECT setval(pg_get_serial_sequence('"Year"', 'id'), (SELECT MAX(id) FROM "Year
 
 TRUNCATE "ClassSubjectAssignment", "Class", "ClassLabel", "ProgramSubject", "ProgramYear", "Subject", "Program", "Teacher" RESTART IDENTITY CASCADE;
 
-INSERT INTO "Program" (id, name, "schoolId", "availableHours", "createdAt", "updatedAt")
+INSERT INTO "Program" (id, name, "schoolId", "createdAt", "updatedAt")
 VALUES
-  (1,  'Gradbeni tehnik', 3, 35.00, NOW(), NOW()),
-  (2,  'Tehniška gimnazija', 3, 32.00, NOW(), NOW()),
-  (3,  'Pomočnik pri tehnologiji gradnje', 3, 32.00, NOW(), NOW()),
-  (4,  'Dimnikar', 3, 34.00, NOW(), NOW()),
-  (5,  'Tesar', 3, 34.00, NOW(), NOW()),
-  (6,  'Izvajalec suhomontažne gradnje', 3, 34.00, NOW(), NOW()),
-  (7,  'Pečar – polagalec keramičnih oblog', 3, 34.00, NOW(), NOW()),
-  (8,  'Slikopleskar – črkoslikar', 3, 34.00, NOW(), NOW()),
-  (9,  'Zidar', 3, 34.00, NOW(), NOW()),
-  (10, 'Okoljevarstveni tehnik', 3, 33.00, NOW(), NOW());
+  (1,  'Gradbeni tehnik', 3, NOW(), NOW()),
+  (2,  'Tehniška gimnazija', 3, NOW(), NOW()),
+  (3,  'Pomočnik pri tehnologiji gradnje', 3, NOW(), NOW()),
+  (4,  'Dimnikar', 3, NOW(), NOW()),
+  (5,  'Tesar', 3, NOW(), NOW()),
+  (6,  'Izvajalec suhomontažne gradnje', 3, NOW(), NOW()),
+  (7,  'Pečar – polagalec keramičnih oblog', 3, NOW(), NOW()),
+  (8,  'Slikopleskar – črkoslikar', 3, NOW(), NOW()),
+  (9,  'Zidar', 3, NOW(), NOW()),
+  (10, 'Okoljevarstveni tehnik', 3, NOW(), NOW());
 
 SELECT setval(pg_get_serial_sequence('"Program"', 'id'), (SELECT MAX(id) FROM "Program"));
 
