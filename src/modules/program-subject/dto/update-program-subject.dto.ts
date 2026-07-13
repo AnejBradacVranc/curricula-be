@@ -1,0 +1,22 @@
+import { Type } from 'class-transformer';
+import { IsInt, IsNotEmpty, IsNumber, Min } from 'class-validator';
+
+export class UpdateProgramSubjectDto {
+  @Type(() => Number)
+  @IsInt()
+  programId: number;
+
+  @Type(() => Number)
+  @IsInt()
+  subjectId: number;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  yearId: number;
+
+  @Type(() => Number)
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @IsNotEmpty()
+  requiredHours: number;
+}

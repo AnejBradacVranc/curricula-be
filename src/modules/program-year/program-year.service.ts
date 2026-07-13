@@ -6,6 +6,10 @@ import {
 } from '@nestjs/common';
 import { Prisma } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
+import {
+  applyTeacherHourDeltas,
+  teacherAssignmentHoursDelta,
+} from '../teacher/teacher-hours.util';
 import { CreateProgramYearDto } from './dto/create-program-year.dto';
 import { UpdateProgramYearDto } from './dto/update-program-year.dto';
 
@@ -88,10 +92,47 @@ export class ProgramYearsService {
       throw new BadRequestException('Number of weeks must be at least 1');
     }
 
-    return this.prisma.programYear.update({
-      where: { programId_yearId: { programId, yearId } },
-      data: { numWeeks },
-      include: programYearInclude,
+    const oldNumWeeks = programYear.numWeeks;
+
+    if (oldNumWeeks === numWeeks) {
+      return this.prisma.programYear.findUniqueOrThrow({
+        where: { programId_yearId: { programId, yearId } },
+        include: programYearInclude,
+      });
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const assignments = await tx.classSubjectAssignment.findMany({
+        where: { programId, yearId },
+        include: { programSubject: true },
+      });
+
+      const deltaByTeacher = new Map<number, Prisma.Decimal>();
+
+      for (const assignment of assignments) {
+        const delta = teacherAssignmentHoursDelta(
+          assignment.programSubject.requiredHours,
+          assignment.programSubject.requiredHours,
+          oldNumWeeks,
+          numWeeks,
+        );
+
+        if (delta.isZero()) {
+          continue;
+        }
+
+        const current =
+          deltaByTeacher.get(assignment.teacherId) ?? new Prisma.Decimal(0);
+        deltaByTeacher.set(assignment.teacherId, current.add(delta));
+      }
+
+      await applyTeacherHourDeltas(tx, schoolId, deltaByTeacher);
+
+      return tx.programYear.update({
+        where: { programId_yearId: { programId, yearId } },
+        data: { numWeeks },
+        include: programYearInclude,
+      });
     });
   }
 }

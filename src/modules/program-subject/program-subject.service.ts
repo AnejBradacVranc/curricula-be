@@ -5,7 +5,12 @@ import {
 } from '@nestjs/common';
 import { Prisma, ProgramSubject } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
+import {
+  applyTeacherHourDeltas,
+  teacherAssignmentHoursDelta,
+} from '../teacher/teacher-hours.util';
 import { CreateProgramSubjectDto } from './dto/create-program-subject.dto';
+import { UpdateProgramSubjectDto } from './dto/update-program-subject.dto';
 
 const programSubjectInclude = {
   subject: { omit: { schoolId: true }, include: { category: true } },
@@ -81,6 +86,75 @@ export class ProgramSubjectsService {
         subject: { connect: { id: subjectId } },
         programYear: { connect: { programId_yearId: { programId, yearId } } },
       },
+    });
+  }
+
+  async updateProgramSubject(
+    schoolId: number,
+    data: UpdateProgramSubjectDto,
+  ): Promise<ProgramSubjectWithRelations> {
+    const { programId, subjectId, yearId, requiredHours } = data;
+    const newRequiredHours = new Prisma.Decimal(requiredHours);
+
+    const programSubject = await this.prisma.programSubject.findFirst({
+      where: {
+        programId,
+        subjectId,
+        yearId,
+        program: { schoolId },
+      },
+      include: { programYear: true },
+    });
+
+    if (!programSubject) {
+      throw new NotFoundException('Program subject not found');
+    }
+
+    const oldRequiredHours = programSubject.requiredHours;
+
+    if (oldRequiredHours.equals(newRequiredHours)) {
+      return this.prisma.programSubject.findUniqueOrThrow({
+        where: {
+          programId_subjectId_yearId: { programId, subjectId, yearId },
+        },
+        include: programSubjectInclude,
+      });
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const assignments = await tx.classSubjectAssignment.findMany({
+        where: { programId, subjectId, yearId },
+      });
+
+      const deltaByTeacher = new Map<number, Prisma.Decimal>();
+      const numWeeks = programSubject.programYear.numWeeks;
+
+      for (const assignment of assignments) {
+        const delta = teacherAssignmentHoursDelta(
+          oldRequiredHours,
+          newRequiredHours,
+          numWeeks,
+          numWeeks,
+        );
+
+        if (delta.isZero()) {
+          continue;
+        }
+
+        const current =
+          deltaByTeacher.get(assignment.teacherId) ?? new Prisma.Decimal(0);
+        deltaByTeacher.set(assignment.teacherId, current.add(delta));
+      }
+
+      await applyTeacherHourDeltas(tx, schoolId, deltaByTeacher);
+
+      return tx.programSubject.update({
+        where: {
+          programId_subjectId_yearId: { programId, subjectId, yearId },
+        },
+        data: { requiredHours: newRequiredHours },
+        include: programSubjectInclude,
+      });
     });
   }
 }
