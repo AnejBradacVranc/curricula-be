@@ -14,13 +14,18 @@
     "lib": ["ES2024"],
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
+    "paths": {
+      "src/*": ["./src/*"],
+      "generated/*": ["./generated/*"]
+    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
+    "strictPropertyInitialization": false,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "include": ["src/**/*", "test/**/*", "generated/**/*", "prisma.config.ts"]
 }
