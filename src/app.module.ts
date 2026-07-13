@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './core/prisma/prisma.module';
 import { AssignmentsModule } from './modules/assignment/assignment.module';
 import { ProgramSubjectsModule } from './modules/program-subject/program-subject.module';
+import { ProgramYearsModule } from './modules/program-year/program-year.module';
 import { ProgramsModule } from './modules/program/program.module';
 import { YearsModule } from './modules/year/year.module';
 import { CategoriesModule } from './modules/category/category.module';
@@ -28,6 +29,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     AssignmentsModule,
     ProgramsModule,
     ProgramSubjectsModule,
+    ProgramYearsModule,
     YearsModule,
     CategoriesModule,
     AdditionalActivityModule,
@@ -60,6 +62,10 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
           {
             path: 'subject-to-program',
             module: ProgramSubjectsModule,
+          },
+          {
+            path: 'program-years',
+            module: ProgramYearsModule,
           },
           {
             path: 'years',
