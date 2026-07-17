@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "User" ADD COLUMN "password" TEXT NOT NULL DEFAULT '';
-
-ALTER TABLE "User" ALTER COLUMN "password" DROP DEFAULT;
