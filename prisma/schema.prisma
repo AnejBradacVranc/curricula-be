@@ -89,24 +89,18 @@ model Program {
   @@unique([schoolId, name])
 }
 
-//department albels a, b, c, d, e, f, cr, gr, tr...etc
-model ClassLabel {
-  id    Int    @id @default(autoincrement())
-  label String @unique // "a", "b", "c"
-  classes Class[]
-}
-
+// department labels: a, b, c, d, e, f, cr, gr, tr...
 model Class {
-  id        Int @id @default(autoincrement())
+  id        Int    @id @default(autoincrement())
   programId Int
   yearId    Int
-  labelId   Int
+  label     String
 
   program     Program     @relation(fields: [programId], references: [id])
   programYear ProgramYear @relation(fields: [programId, yearId], references: [programId, yearId])
-  label       ClassLabel  @relation(fields: [labelId], references: [id])
   assignments ClassSubjectAssignment[]
-  @@unique([ programId, yearId, labelId])
+
+  @@unique([programId, yearId, label])
 }
 
 

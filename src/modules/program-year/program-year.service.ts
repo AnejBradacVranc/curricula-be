@@ -16,9 +16,7 @@ import { UpdateProgramYearDto } from './dto/update-program-year.dto';
 const programYearInclude = {
   year: true,
   classes: {
-    include: {
-      label: true,
-    },
+    orderBy: { label: 'asc' },
   },
 } as const satisfies Prisma.ProgramYearInclude;
 

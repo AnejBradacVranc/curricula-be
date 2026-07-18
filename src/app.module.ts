@@ -18,6 +18,7 @@ import { TeachersModule } from './modules/teacher/teacher.module';
 import { UsersModule } from './modules/user/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
+import { ClassesModule } from './modules/class/class.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     CategoriesModule,
     AdditionalActivityModule,
     AdditionalActivityAssignmentModule,
+    ClassesModule,
     RouterModule.register([
       {
         path: 'schools',
@@ -82,6 +84,10 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
           {
             path: 'additional-activity-assignments',
             module: AdditionalActivityAssignmentModule,
+          },
+          {
+            path: 'classes',
+            module: ClassesModule,
           },
         ],
       },

@@ -27,5 +27,11 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
   },
+  "watchOptions": {
+    "watchFile": "fixedPollingInterval",
+    "watchDirectory": "fixedPollingInterval",
+    "fallbackPolling": "dynamicPriority",
+    "synchronousWatchDirectory": true
+  },
   "include": ["src/**/*", "test/**/*", "generated/**/*", "prisma.config.ts"]
 }

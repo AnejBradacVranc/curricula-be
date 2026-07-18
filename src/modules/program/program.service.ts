@@ -9,9 +9,7 @@ const programInclude = {
     include: {
       year: true,
       classes: {
-        include: {
-          label: true,
-        },
+        orderBy: { label: 'asc' },
       },
     },
   },
@@ -26,7 +24,7 @@ const programInclude = {
       },
       assignments: {
         include: {
-          class: { include: { label: true } },
+          class: true,
           teacher: { omit: { schoolId: true } },
         },
       },

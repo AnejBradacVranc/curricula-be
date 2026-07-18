@@ -15,7 +15,6 @@ import { DeleteAssignmentDto } from './dto/delete-assignment.dto';
 const assignmentInclude = {
   class: {
     include: {
-      label: true,
       programYear: {
         include: {
           year: true,

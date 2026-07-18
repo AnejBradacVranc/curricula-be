@@ -13,7 +13,23 @@ ON CONFLICT (name) DO UPDATE SET "updatedAt" = NOW();
 
 SELECT setval(pg_get_serial_sequence('"Year"', 'id'), (SELECT MAX(id) FROM "Year"));
 
-TRUNCATE "ClassSubjectAssignment", "Class", "ClassLabel", "ProgramSubject", "ProgramYear", "Subject", "Program", "Teacher" RESTART IDENTITY CASCADE;
+TRUNCATE
+  "ClassSubjectAssignment",
+  "AdditionalTeacherAssignment",
+  "Class",
+  "ProgramSubject",
+  "ProgramYear",
+  "Subject",
+  "Program",
+  "Teacher",
+  "Category"
+RESTART IDENTITY CASCADE;
+
+INSERT INTO "School" (id, name, "createdAt", "updatedAt")
+VALUES (3, 'Srednja gradbena šola in gimnazija Maribor', NOW(), NOW())
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, "updatedAt" = NOW();
+
+SELECT setval(pg_get_serial_sequence('"School"', 'id'), (SELECT MAX(id) FROM "School"));
 
 INSERT INTO "Program" (id, name, "schoolId", "createdAt", "updatedAt")
 VALUES
@@ -44,35 +60,27 @@ VALUES
   (10, 1, 35, NOW(), NOW()), (10, 2, 31, NOW(), NOW()), (10, 3, 31, NOW(), NOW()), (10, 4, 34, NOW(), NOW());
 
 
-INSERT INTO "ClassLabel" (id, label)
+INSERT INTO "Class" ("programId", "yearId", label)
 VALUES
-  (1, 'a'), (2, 'b'), (3, 'c'),
-  (4, 'bt'), (5, 'at'), (6, 'cr'), (7, 'gr'), (8, 'tr')
-ON CONFLICT (label) DO UPDATE SET label = EXCLUDED.label;
+  (1, 1, 'a'), (1, 1, 'b'), (1, 1, 'c'),
+  (1, 2, 'a'), (1, 2, 'b'), (1, 3, 'a'), (1, 3, 'b'), (1, 4, 'a'), (1, 4, 'b'),
+  (2, 1, 'a'), (2, 1, 'b'),
+  (3, 1, 'a'), (3, 1, 'b'), (3, 2, 'a'), (3, 2, 'b'),
+  (4, 1, 'bt'), (4, 1, 'at'), (4, 2, 'bt'), (4, 2, 'at'), (4, 3, 'bt'), (4, 3, 'at'),
+  (5, 1, 'bt'), (5, 1, 'at'), (5, 2, 'bt'), (5, 2, 'at'), (5, 3, 'bt'), (5, 3, 'at'),
+  (6, 1, 'bt'), (6, 1, 'at'), (6, 2, 'bt'), (6, 2, 'at'), (6, 3, 'bt'), (6, 3, 'at'),
+  (7, 1, 'bt'), (7, 1, 'at'), (7, 2, 'bt'), (7, 2, 'at'), (7, 3, 'bt'), (7, 3, 'at'),
+  (8, 1, 'bt'), (8, 1, 'at'), (8, 2, 'bt'), (8, 2, 'at'), (8, 3, 'bt'), (8, 3, 'at'),
+  (9, 1, 'bt'), (9, 1, 'at'), (9, 2, 'bt'), (9, 2, 'at'), (9, 3, 'bt'), (9, 3, 'at'),
+  (10, 1, 'a'), (10, 1, 'b'), (10, 1, 'c'),
+  (10, 2, 'a'), (10, 2, 'b'), (10, 3, 'a'), (10, 3, 'b'), (10, 4, 'a'), (10, 4, 'b');
 
-SELECT setval(pg_get_serial_sequence('"ClassLabel"', 'id'), (SELECT MAX(id) FROM "ClassLabel"));
-
-INSERT INTO "Class" ("programId", "yearId", "labelId")
+INSERT INTO "Category" (id, name)
 VALUES
-  (1, 1, 1), (1, 1, 2), (1, 1, 3),
-  (1, 2, 1), (1, 2, 2), (1, 3, 1), (1, 3, 2), (1, 4, 1), (1, 4, 2),
-  (2, 1, 1), (2, 1, 2),
-  (3, 1, 1), (3, 1, 2), (3, 2, 1), (3, 2, 2),
-  (4, 1, 4), (4, 1, 5), (4, 2, 4), (4, 2, 5), (4, 3, 4), (4, 3, 5),
-  (5, 1, 4), (5, 1, 5), (5, 2, 4), (5, 2, 5), (5, 3, 4), (5, 3, 5),
-  (6, 1, 4), (6, 1, 5), (6, 2, 4), (6, 2, 5), (6, 3, 4), (6, 3, 5),
-  (7, 1, 4), (7, 1, 5), (7, 2, 4), (7, 2, 5), (7, 3, 4), (7, 3, 5),
-  (8, 1, 4), (8, 1, 5), (8, 2, 4), (8, 2, 5), (8, 3, 4), (8, 3, 5),
-  (9, 1, 4), (9, 1, 5), (9, 2, 4), (9, 2, 5), (9, 3, 4), (9, 3, 5),
-  (10, 1, 1), (10, 1, 2), (10, 1, 3),
-  (10, 2, 1), (10, 2, 2), (10, 3, 1), (10, 3, 2),   (10, 4, 1), (10, 4, 2);
-
-INSERT INTO "Category" (id, name, "createdAt", "updatedAt")
-VALUES
-  (1, 'Splošnoizobraževalni predmeti', NOW(), NOW()),
-  (2, 'Strokovni moduli', NOW(), NOW()),
-  (3, 'Odprti kurikul', NOW(), NOW())
-ON CONFLICT (name) DO UPDATE SET "updatedAt" = NOW();
+  (1, 'Splošnoizobraževalni predmeti'),
+  (2, 'Strokovni moduli'),
+  (3, 'Odprti kurikul')
+ON CONFLICT (name) DO NOTHING;
 
 SELECT setval(pg_get_serial_sequence('"Category"', 'id'), (SELECT MAX(id) FROM "Category"));
 
@@ -461,29 +469,14 @@ VALUES
   (2, 17, 1, 3.00, NOW(), NOW()),
   (2, 18, 1, 2.50, NOW(), NOW());
 
-INSERT INTO "Teacher" (id, name, surname, email, "schoolId", "assignedHours", "createdAt", "updatedAt")
+-- Teachers with no class/activity assignments (assignedHours / totalHours = 0)
+INSERT INTO "Teacher" (id, name, surname, email, "schoolId", "assignedHours", "additionalActivityHours", "totalHours", "createdAt", "updatedAt")
 VALUES
-  (1, 'Majda', 'Drobnič', 'majda.drobnich@gradbena.si', 3, 18.00, NOW(), NOW()),
-  (2, 'Riko', 'Vranc', 'riko.vranc@gradbena.si', 3, 24.00, NOW(), NOW()),
-  (3, 'Goran', 'Perhavec', 'goran.perhavec@gradbena.si', 3, 22.00, NOW(), NOW());
+  (1, 'Majda', 'Drobnič', 'majda.drobnich@gradbena.si', 3, 0, 0, 0, NOW(), NOW()),
+  (2, 'Riko', 'Vranc', 'riko.vranc@gradbena.si', 3, 0, 0, 0, NOW(), NOW()),
+  (3, 'Goran', 'Perhavec', 'goran.perhavec@gradbena.si', 3, 0, 0, 0, NOW(), NOW());
 
 SELECT setval(pg_get_serial_sequence('"Teacher"', 'id'), (SELECT MAX(id) FROM "Teacher"));
-
-
--- ─── Class subject assignments (teacher → class + subject) ───────────────────
-INSERT INTO "ClassSubjectAssignment" ("classId", "programId", "subjectId", "yearId", "teacherId")
-SELECT c.id, v.p, v.s, v.y, v.t
-FROM (VALUES
-  (1, 1, 1, 1), (1, 1, 2, 1), (1, 1, 3, 1), (1, 1, 4, 1),
-  (1, 11, 1, 2), (1, 12, 1, 2), (1, 11, 2, 2), (1, 12, 2, 2), (1, 13, 2, 2),
-  (4, 8, 1, 2), (4, 22, 1, 2), (5, 23, 1, 2), (9, 27, 1, 2),
-  (1, 14, 2, 3), (1, 14, 3, 3), (1, 14, 4, 3),
-  (6, 24, 1, 3), (7, 25, 1, 3), (8, 26, 1, 3),
-  (10, 31, 1, 3), (10, 34, 2, 3), (10, 32, 1, 3), (2, 17, 1, 3), (2, 15, 1, 3)
-) AS v(p, s, y, t)
-JOIN "Class" c ON c."programId" = v.p AND c."yearId" = v.y
-JOIN "ClassLabel" l ON l.id = c."labelId"
-  AND l.label = CASE WHEN v.p IN (4,5,6,7,8,9) THEN 'bt' ELSE 'a' END;
 
 COMMIT;
 

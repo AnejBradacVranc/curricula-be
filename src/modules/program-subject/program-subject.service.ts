@@ -22,7 +22,7 @@ const programSubjectInclude = {
   },
   assignments: {
     include: {
-      class: { include: { label: true } },
+      class: true,
       teacher: { omit: { schoolId: true } },
     },
   },
