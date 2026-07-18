@@ -14,7 +14,7 @@ export const teacherDetailSelect = {
     select: {
       class: {
         select: {
-          label: { select: { label: true } },
+          label: true,
           programYear: {
             select: {
               numWeeks: true,
