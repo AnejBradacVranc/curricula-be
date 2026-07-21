@@ -6,7 +6,6 @@ import { CreateProgramDto } from './dto/create-program.dto';
 const programInclude = {
   programYears: {
     omit: { programId: true },
-    orderBy: { yearId: 'asc' },
     include: {
       year: true,
       classes: {

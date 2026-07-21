@@ -8,7 +8,7 @@ export class AdditionalActivityService {
 
   async findAll(): Promise<AdditionalActivityDto[]> {
     return this.prisma.additionalActivities.findMany({
-      orderBy: { id: 'asc' },
+      orderBy: { name: 'asc' },
       select: { id: true, name: true },
     });
   }
