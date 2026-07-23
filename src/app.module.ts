@@ -4,25 +4,30 @@ import { RouterModule } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './core/prisma/prisma.module';
-import { AssignmentsModule } from './modules/assignment/assignment.module';
-import { ProgramSubjectsModule } from './modules/program-subject/program-subject.module';
-import { ProgramYearsModule } from './modules/program-year/program-year.module';
-import { ProgramsModule } from './modules/program/program.module';
-import { YearsModule } from './modules/year/year.module';
-import { CategoriesModule } from './modules/category/category.module';
-import { AdditionalActivityModule } from './modules/additional-activity/additional-activity.module';
-import { AdditionalActivityAssignmentModule } from './modules/additional-activity-assignment/additional-activity-assignment.module';
-import { SchoolsModule } from './modules/school/school.module';
-import { SubjectsModule } from './modules/subject/subject.module';
-import { TeachersModule } from './modules/teacher/teacher.module';
-import { UsersModule } from './modules/user/user.module';
-import { AuthModule } from './modules/auth/auth.module';
+import {
+  AdditionalActivityAssignmentModule,
+  AdditionalActivityModule,
+  AssignmentsModule,
+  AuthModule,
+  CategoriesModule,
+  ClassesModule,
+  ImportModule,
+  ProgramSubjectsModule,
+  ProgramYearsModule,
+  ProgramsModule,
+  SchoolsModule,
+  SubjectsModule,
+  TeachersModule,
+  UsersModule,
+  YearsModule,
+} from './modules';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
-import { ClassesModule } from './modules/class/class.module';
+import { AiModule } from './core/ai/ai.module';
 
 @Module({
   imports: [
     PrismaModule,
+    AiModule,
     UsersModule,
     SchoolsModule,
     TeachersModule,
@@ -36,6 +41,7 @@ import { ClassesModule } from './modules/class/class.module';
     AdditionalActivityModule,
     AdditionalActivityAssignmentModule,
     ClassesModule,
+    ImportModule,
     RouterModule.register([
       {
         path: 'schools',
@@ -88,6 +94,10 @@ import { ClassesModule } from './modules/class/class.module';
           {
             path: 'classes',
             module: ClassesModule,
+          },
+          {
+            path: 'import',
+            module: ImportModule,
           },
         ],
       },

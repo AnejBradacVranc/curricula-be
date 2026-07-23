@@ -1,0 +1,15 @@
+export { AdditionalActivityModule } from './additional-activity/additional-activity.module';
+export { AdditionalActivityAssignmentModule } from './additional-activity-assignment/additional-activity-assignment.module';
+export { AssignmentsModule } from './assignment/assignment.module';
+export { AuthModule } from './auth/auth.module';
+export { CategoriesModule } from './category/category.module';
+export { ClassesModule } from './class/class.module';
+export { ImportModule } from './import/import.module';
+export { ProgramSubjectsModule } from './program-subject/program-subject.module';
+export { ProgramYearsModule } from './program-year/program-year.module';
+export { ProgramsModule } from './program/program.module';
+export { SchoolsModule } from './school/school.module';
+export { SubjectsModule } from './subject/subject.module';
+export { TeachersModule } from './teacher/teacher.module';
+export { UsersModule } from './user/user.module';
+export { YearsModule } from './year/year.module';
