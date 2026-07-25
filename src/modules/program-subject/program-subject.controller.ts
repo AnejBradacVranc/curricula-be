@@ -1,6 +1,15 @@
-import { Body, Controller, Get, Patch, Post, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Patch,
+  Post,
+  Request,
+} from '@nestjs/common';
 import { ProgramSubject } from 'generated/prisma/client';
 import { CreateProgramSubjectDto } from './dto/create-program-subject.dto';
+import { DeleteProgramSubjectDto } from './dto/delete-program-subject.dto';
 import { UpdateProgramSubjectDto } from './dto/update-program-subject.dto';
 import {
   ProgramSubjectsService,
@@ -42,6 +51,17 @@ export class ProgramSubjectsController {
     return this.programSubjectsService.updateProgramSubject(
       req.user.schoolId,
       updateProgramSubjectDto,
+    );
+  }
+
+  @Delete()
+  async deleteProgramSubject(
+    @Request() req: { user: AuthenticatedUser },
+    @Body() deleteProgramSubjectDto: DeleteProgramSubjectDto,
+  ): Promise<void> {
+    return this.programSubjectsService.deleteProgramSubject(
+      req.user.schoolId,
+      deleteProgramSubjectDto,
     );
   }
 }
