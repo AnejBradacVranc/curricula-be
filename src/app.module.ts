@@ -22,12 +22,10 @@ import {
   YearsModule,
 } from './modules';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
-import { AiModule } from './core/ai/ai.module';
 
 @Module({
   imports: [
     PrismaModule,
-    AiModule,
     UsersModule,
     SchoolsModule,
     TeachersModule,

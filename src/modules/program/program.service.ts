@@ -1,7 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Prisma, Program } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { CreateProgramDto } from './dto/create-program.dto';
+import {
+  applyTeacherHourDeltas,
+  teacherAssignmentHours,
+} from '../teacher/teacher-hours.util';
 
 const programInclude = {
   programYears: {
@@ -67,6 +75,26 @@ export class ProgramsService {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      const assignments = await tx.classSubjectAssignment.findMany({
+        where: { programId },
+        include: {
+          programSubject: { include: { programYear: true } },
+        },
+      });
+
+      const deltaByTeacher = new Map<number, Prisma.Decimal>();
+
+      for (const a of assignments) {
+        const hours = teacherAssignmentHours(
+          a.programSubject.requiredHours,
+          a.programSubject.programYear.numWeeks,
+        );
+        const prev = deltaByTeacher.get(a.teacherId) ?? new Prisma.Decimal(0);
+        deltaByTeacher.set(a.teacherId, prev.sub(hours));
+      }
+
+      await applyTeacherHourDeltas(tx, schoolId, deltaByTeacher);
+
       await tx.classSubjectAssignment.deleteMany({
         where: { programId },
       });
@@ -79,7 +107,6 @@ export class ProgramsService {
       await tx.programYear.deleteMany({
         where: { programId },
       });
-
       return tx.program.delete({
         where: { schoolId, id: programId },
       });
