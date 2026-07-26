@@ -1,6 +1,15 @@
-import { Body, Controller, Get, Param, Post, Request } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Request,
+} from '@nestjs/common';
 import { Teacher } from 'generated/prisma/client';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
+import { CreateTeachersDto } from './dto/create-teachers.dto';
 import { TeacherDetailDto } from './dto/teacher-detail.dto';
 import { TeachersService } from './teacher.service';
 import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
@@ -14,6 +23,17 @@ export class TeachersController {
     @Request() req: { user: AuthenticatedUser },
   ): Promise<Teacher[]> {
     return this.teachersService.teachersBySchool(req.user.schoolId);
+  }
+
+  @Post('bulk')
+  async createTeachers(
+    @Request() req: { user: AuthenticatedUser },
+    @Body() createTeachersDto: CreateTeachersDto,
+  ): Promise<Teacher[]> {
+    return this.teachersService.createTeachers(
+      req.user.schoolId,
+      createTeachersDto,
+    );
   }
 
   @Get(':id')
@@ -33,5 +53,13 @@ export class TeachersController {
       req.user.schoolId,
       createTeacherDto,
     );
+  }
+
+  @Delete(':id')
+  async deleteTeacher(
+    @Request() req: { user: AuthenticatedUser },
+    @Param('id') id: number,
+  ): Promise<Teacher> {
+    return this.teachersService.deleteTeacher(req.user.schoolId, id);
   }
 }

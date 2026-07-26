@@ -4,7 +4,7 @@ export { AssignmentsModule } from './assignment/assignment.module';
 export { AuthModule } from './auth/auth.module';
 export { CategoriesModule } from './category/category.module';
 export { ClassesModule } from './class/class.module';
-export { ImportModule } from './import/import.module';
+export { ExtractModule } from './extract/extract.module';
 export { ProgramSubjectsModule } from './program-subject/program-subject.module';
 export { ProgramYearsModule } from './program-year/program-year.module';
 export { ProgramsModule } from './program/program.module';

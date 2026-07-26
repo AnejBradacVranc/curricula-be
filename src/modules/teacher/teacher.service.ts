@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, Teacher } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
+import { CreateTeachersDto } from './dto/create-teachers.dto';
 import {
   TeacherDetailDto,
   teacherDetailSelect,
@@ -42,6 +43,50 @@ export class TeachersService {
         totalHours: assignedHours,
         school: { connect: { id: schoolId } },
       },
+    });
+  }
+
+  async createTeachers(
+    schoolId: number,
+    data: CreateTeachersDto,
+  ): Promise<Teacher[]> {
+    return this.prisma.teacher.createManyAndReturn({
+      data: data.teachers.map((teacher) => {
+        const assignedHours = new Prisma.Decimal(teacher.assignedHours);
+
+        return {
+          name: teacher.name.trim(),
+          surname: teacher.surname.trim(),
+          email: teacher.email.trim().toLowerCase(),
+          color: teacher.color,
+          schoolId,
+          assignedHours,
+          additionalActivityHours: 0,
+          totalHours: assignedHours,
+        };
+      }),
+    });
+  }
+
+  async deleteTeacher(schoolId: number, teacherId: number): Promise<Teacher> {
+    const teacher = await this.prisma.teacher.findFirst({
+      where: { id: teacherId, schoolId },
+    });
+
+    if (!teacher) {
+      throw new NotFoundException('Teacher not found');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      await tx.classSubjectAssignment.deleteMany({
+        where: { teacherId },
+      });
+      await tx.additionalTeacherAssignment.deleteMany({
+        where: { teacherId },
+      });
+      return tx.teacher.delete({
+        where: { id: teacherId },
+      });
     });
   }
 }

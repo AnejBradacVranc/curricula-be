@@ -5,6 +5,28 @@ import {
   PipeTransform,
 } from '@nestjs/common';
 
+const MAX_SIZE_BYTES = 200 * 1024;
+
+const ALLOWED_EXTENSIONS = [
+  '.pdf',
+  '.csv',
+  '.xls',
+  '.xlsx',
+  '.doc',
+  '.docx',
+] as const;
+
+const ALLOWED_MIME_TYPES = new Set([
+  'application/pdf',
+  'text/csv',
+  'application/csv',
+  'text/plain',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+]);
+
 @Injectable()
 export class FileValidationPipe implements PipeTransform {
   transform(
@@ -12,36 +34,32 @@ export class FileValidationPipe implements PipeTransform {
     _metadata: ArgumentMetadata,
   ): Express.Multer.File {
     if (!value) {
-      throw new BadRequestException('Datoteka je obvezna.');
+      throw new BadRequestException('File is required.');
     }
 
-    const maxSizeBytes = 200 * 1024;
-    const isOkSize = value.size <= maxSizeBytes;
-
-    if (!isOkSize) {
+    if (value.size > MAX_SIZE_BYTES) {
       throw new BadRequestException(
-        'Datoteka PDF presega dovoljeno velikost (200 KB).',
+        'File exceeds the maximum allowed size (200 KB).',
       );
     }
 
     const mimeType = value.mimetype?.toLowerCase() ?? '';
     const originalName = value.originalname?.toLowerCase() ?? '';
-    const isPdfMime = mimeType === 'application/pdf';
-    const isPdfExtension = originalName.endsWith('.pdf');
+    const isAllowedExtension = ALLOWED_EXTENSIONS.some((ext) =>
+      originalName.endsWith(ext),
+    );
+    const isAllowedMime = ALLOWED_MIME_TYPES.has(mimeType);
 
-    if (!isPdfMime && !isPdfExtension) {
-      throw new BadRequestException('Dovoljene so samo PDF datoteke.');
+    if (!isAllowedMime || !isAllowedExtension) {
+      throw new BadRequestException(
+        'Only PDF, CSV, Excel (.xls, .xlsx), and Word (.doc, .docx) files are allowed.',
+      );
     }
 
     if (!value.buffer?.length) {
       throw new BadRequestException(
-        'Datoteka nima vsebine v spominu (manjka buffer).',
+        'File has no content in memory (missing buffer).',
       );
-    }
-
-    const header = value.buffer.subarray(0, 4).toString('utf8');
-    if (header !== '%PDF') {
-      throw new BadRequestException('Datoteka ni veljaven PDF.');
     }
 
     return value;

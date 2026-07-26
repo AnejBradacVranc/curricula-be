@@ -6,34 +6,34 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileValidationPipe } from 'src/core/validation/fileValidationPipe';
-import { CreateTeacherDto } from '../teacher/dto/create-teacher.dto';
-import { ImportService } from './import.service';
+import { ExtractTeacherSchema } from '../teacher/dto/create-teacher.schema';
+import { ExtractService } from './extract.service';
 
 @Controller()
-export class ImportController {
-  constructor(private readonly importService: ImportService) {}
+export class ExtractController {
+  constructor(private readonly extractService: ExtractService) {}
 
   @Post('program')
   @UseInterceptors(FileInterceptor('file'))
-  async importProgram(
+  async extractProgram(
     @UploadedFile(new FileValidationPipe()) file: Express.Multer.File,
   ): Promise<void> {
-    return this.importService.importProgram(file);
+    return this.extractService.extractProgram(file);
   }
 
   @Post('teachers')
   @UseInterceptors(FileInterceptor('file'))
-  async importTeachers(
+  async extractTeachers(
     @UploadedFile(new FileValidationPipe()) file: Express.Multer.File,
-  ): Promise<CreateTeacherDto[]> {
-    return this.importService.importTeachers(file);
+  ): Promise<ExtractTeacherSchema[]> {
+    return this.extractService.extractTeachers(file);
   }
 
   @Post('subjects')
   @UseInterceptors(FileInterceptor('file'))
-  async importSubjects(
+  async extractSubjects(
     @UploadedFile(new FileValidationPipe()) file: Express.Multer.File,
   ): Promise<void> {
-    return this.importService.importSubjects(file);
+    return this.extractService.extractSubjects(file);
   }
 }

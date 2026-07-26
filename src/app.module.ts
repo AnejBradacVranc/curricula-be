@@ -11,7 +11,7 @@ import {
   AuthModule,
   CategoriesModule,
   ClassesModule,
-  ImportModule,
+  ExtractModule,
   ProgramSubjectsModule,
   ProgramYearsModule,
   ProgramsModule,
@@ -39,7 +39,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
     AdditionalActivityModule,
     AdditionalActivityAssignmentModule,
     ClassesModule,
-    ImportModule,
+    ExtractModule,
     RouterModule.register([
       {
         path: 'schools',
@@ -94,8 +94,8 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
             module: ClassesModule,
           },
           {
-            path: 'import',
-            module: ImportModule,
+            path: 'extract',
+            module: ExtractModule,
           },
         ],
       },
