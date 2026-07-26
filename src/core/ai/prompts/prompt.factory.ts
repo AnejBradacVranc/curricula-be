@@ -6,7 +6,6 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 export enum ExtractPromptKind {
   Teachers = 'teachers',
   Program = 'program',
-  Subjects = 'subjects',
 }
 
 export type PromptPair = {

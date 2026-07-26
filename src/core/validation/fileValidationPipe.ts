@@ -5,7 +5,7 @@ import {
   PipeTransform,
 } from '@nestjs/common';
 
-const MAX_SIZE_BYTES = 200 * 1024;
+const MAX_SIZE_BYTES = 5000 * 1024;
 
 const ALLOWED_EXTENSIONS = [
   '.pdf',
@@ -39,7 +39,7 @@ export class FileValidationPipe implements PipeTransform {
 
     if (value.size > MAX_SIZE_BYTES) {
       throw new BadRequestException(
-        'File exceeds the maximum allowed size (200 KB).',
+        'File exceeds the maximum allowed size (5 MB).',
       );
     }
 

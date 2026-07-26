@@ -6,6 +6,7 @@ import {
 import { Prisma, Program } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { CreateProgramDto } from './dto/create-program.dto';
+import { ImportProgramDto } from './dto/import-program.dto';
 import {
   applyTeacherHourDeltas,
   teacherAssignmentHours,
@@ -122,6 +123,84 @@ export class ProgramsService {
         ...data,
         school: { connect: { id: schoolId } },
       },
+    });
+  }
+
+  async importProgram(
+    schoolId: number,
+    data: ImportProgramDto,
+  ): Promise<ProgramWithRelations> {
+    const programId = await this.prisma.$transaction(async (tx) => {
+      const subjectIdByKey = new Map<string, number>();
+
+      for (const year of data.years) {
+        for (const subject of year.subjects) {
+          if (subject.subjectId != null) {
+            continue;
+          }
+
+          const name = subject.name!.trim();
+          const key = name.toLowerCase();
+          if (subjectIdByKey.has(key)) {
+            continue;
+          }
+
+          const created = await tx.subject.create({
+            data: {
+              name,
+              abbrevation: subject.abbrevation!.trim(),
+              school: { connect: { id: schoolId } },
+              category: { connect: { id: subject.categoryId! } },
+            },
+          });
+          subjectIdByKey.set(key, created.id);
+        }
+      }
+
+      const program = await tx.program.create({
+        data: {
+          name: data.name.trim(),
+          school: { connect: { id: schoolId } },
+        },
+      });
+
+      for (const year of data.years) {
+        await tx.programYear.create({
+          data: {
+            programId: program.id,
+            yearId: year.yearId,
+            numWeeks: year.numWeeks,
+          },
+        });
+
+        for (const subject of year.subjects) {
+          const subjectId =
+            subject.subjectId ??
+            subjectIdByKey.get(subject.name!.trim().toLowerCase());
+
+          if (subjectId == null) {
+            throw new BadRequestException(
+              `Could not resolve subject "${subject.name ?? subject.subjectId}"`,
+            );
+          }
+
+          await tx.programSubject.create({
+            data: {
+              programId: program.id,
+              subjectId,
+              yearId: year.yearId,
+              requiredHours: subject.requiredHours,
+            },
+          });
+        }
+      }
+
+      return program.id;
+    });
+
+    return this.prisma.program.findUniqueOrThrow({
+      where: { id: programId, schoolId },
+      include: programInclude,
     });
   }
 }

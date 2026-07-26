@@ -1,11 +1,14 @@
 import {
   Controller,
   Post,
+  Request,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileValidationPipe } from 'src/core/validation/fileValidationPipe';
+import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
+import { ResolvedExtractProgram } from '../program/dto/extract-program.schema';
 import { ExtractTeacherSchema } from '../teacher/dto/create-teacher.schema';
 import { ExtractService } from './extract.service';
 
@@ -16,9 +19,10 @@ export class ExtractController {
   @Post('program')
   @UseInterceptors(FileInterceptor('file'))
   async extractProgram(
+    @Request() req: { user: AuthenticatedUser },
     @UploadedFile(new FileValidationPipe()) file: Express.Multer.File,
-  ): Promise<void> {
-    return this.extractService.extractProgram(file);
+  ): Promise<ResolvedExtractProgram> {
+    return this.extractService.extractProgram(req.user.schoolId, file);
   }
 
   @Post('teachers')
@@ -27,13 +31,5 @@ export class ExtractController {
     @UploadedFile(new FileValidationPipe()) file: Express.Multer.File,
   ): Promise<ExtractTeacherSchema[]> {
     return this.extractService.extractTeachers(file);
-  }
-
-  @Post('subjects')
-  @UseInterceptors(FileInterceptor('file'))
-  async extractSubjects(
-    @UploadedFile(new FileValidationPipe()) file: Express.Multer.File,
-  ): Promise<void> {
-    return this.extractService.extractSubjects(file);
   }
 }

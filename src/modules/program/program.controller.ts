@@ -5,15 +5,13 @@ import {
   Get,
   Param,
   Post,
-  Query,
   Request,
 } from '@nestjs/common';
 import { Program } from 'generated/prisma/client';
 import { CreateProgramDto } from './dto/create-program.dto';
+import { ImportProgramDto } from './dto/import-program.dto';
 import { ProgramsService, ProgramWithRelations } from './program.service';
 import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
-//import { ProgramByClassDto } from './dto/program-by-class.dto';
-//import { GetProgramsQueryDto } from './dto/get-program.dto';
 
 @Controller()
 export class ProgramsController {
@@ -22,9 +20,19 @@ export class ProgramsController {
   @Get()
   async getPrograms(
     @Request() req: { user: AuthenticatedUser },
-    //@Query() params: GetProgramsQueryDto,
-  ): Promise<ProgramWithRelations[] /*| ProgramByClassDto[]*/> {
+  ): Promise<ProgramWithRelations[]> {
     return await this.programsService.programsBySchool(req.user.schoolId);
+  }
+
+  @Post('import')
+  async importProgram(
+    @Request() req: { user: AuthenticatedUser },
+    @Body() importProgramDto: ImportProgramDto,
+  ): Promise<ProgramWithRelations> {
+    return this.programsService.importProgram(
+      req.user.schoolId,
+      importProgramDto,
+    );
   }
 
   @Get(':id')

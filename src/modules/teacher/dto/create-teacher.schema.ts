@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-/** Fields extracted from documents (PDF/CSV/Excel/Word). */
 export const extractTeacherSchema = z.object({
   name: z.string().min(1),
   surname: z.string().min(1),

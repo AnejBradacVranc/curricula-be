@@ -22,6 +22,7 @@ export class AiService implements AiProvider {
     schema: z.ZodType<T>,
     systemPrompt: string,
     file?: Express.Multer.File,
+    model?: OpenAIResponsesModelId,
   ): Promise<T | null> {
     try {
       const content: UserContent = [{ type: 'text', text: prompt }];
@@ -36,7 +37,7 @@ export class AiService implements AiProvider {
       }
 
       const { output } = await generateText({
-        model: this.getModel(),
+        model: this.getModel(model),
         system: systemPrompt,
         output: Output.object({ schema }),
         messages: [{ role: 'user', content }],
