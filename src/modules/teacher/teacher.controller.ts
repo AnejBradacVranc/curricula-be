@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Request,
 } from '@nestjs/common';
@@ -11,6 +12,7 @@ import { Teacher } from 'generated/prisma/client';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { CreateTeachersDto } from './dto/create-teachers.dto';
 import { TeacherDetailDto } from './dto/teacher-detail.dto';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
 import { TeachersService } from './teacher.service';
 import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 
@@ -52,6 +54,19 @@ export class TeachersController {
     return this.teachersService.createTeacher(
       req.user.schoolId,
       createTeacherDto,
+    );
+  }
+
+  @Patch(':id')
+  async updateTeacher(
+    @Request() req: { user: AuthenticatedUser },
+    @Param('id') id: number,
+    @Body() updateTeacherDto: UpdateTeacherDto,
+  ): Promise<TeacherDetailDto> {
+    return this.teachersService.updateTeacher(
+      req.user.schoolId,
+      id,
+      updateTeacherDto,
     );
   }
 

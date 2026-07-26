@@ -7,6 +7,7 @@ import {
   TeacherDetailDto,
   teacherDetailSelect,
 } from './dto/teacher-detail.dto';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
 
 @Injectable()
 export class TeachersService {
@@ -65,6 +66,35 @@ export class TeachersService {
           totalHours: assignedHours,
         };
       }),
+    });
+  }
+
+  async updateTeacher(
+    schoolId: number,
+    teacherId: number,
+    data: UpdateTeacherDto,
+  ): Promise<TeacherDetailDto> {
+    const teacher = await this.prisma.teacher.findFirst({
+      where: { id: teacherId, schoolId },
+    });
+
+    if (!teacher) {
+      throw new NotFoundException('Teacher not found');
+    }
+
+    const color =
+      data.color == null || data.color === '' ? null : data.color.trim();
+
+    return this.prisma.teacher.update({
+      where: { id: teacherId },
+      data: {
+        name: data.name.trim(),
+        surname: data.surname.trim(),
+        email: data.email.trim().toLowerCase(),
+        color,
+        updatedAt: new Date(),
+      },
+      select: teacherDetailSelect,
     });
   }
 
