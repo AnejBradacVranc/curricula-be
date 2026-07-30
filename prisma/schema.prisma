@@ -182,6 +182,7 @@ model Teacher {
   assignedHours   Decimal          @default(0) @db.Decimal(8, 4)
   additionalActivityHours Decimal @default(0) @db.Decimal(8, 4) 
   totalHours Decimal @default(0) @db.Decimal(8, 4)
+  profileImage String?
 
   additionalActivityAssignments AdditionalTeacherAssignment[]
 
