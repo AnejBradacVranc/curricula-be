@@ -95,7 +95,7 @@ export class TeachersService {
     schoolId: number,
     teacherId: number,
     data: UpdateTeacherDto,
-    profileImage?: Express.Multer.File,
+    profileImage?: Express.Multer.File | null,
   ): Promise<TeacherDetailDto> {
     const teacher = await this.prisma.teacher.findFirst({
       where: { id: teacherId, schoolId },
@@ -112,7 +112,12 @@ export class TeachersService {
           `teacher-${teacherId}`,
           profileImage,
         )
-      : undefined;
+      : profileImage;
+
+    if (profileImageUrl === null && teacher.profileImage) {
+      const storagePath = new URL(teacher.profileImage).pathname;
+      await this.cdnService.removeFile(storagePath);
+    }
 
     const color =
       data.color == null || data.color === '' ? null : data.color.trim();

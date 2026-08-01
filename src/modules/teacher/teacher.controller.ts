@@ -72,13 +72,13 @@ export class TeachersController {
     @Param('id') id: number,
     @Body() updateTeacherDto: UpdateTeacherDto,
     @UploadedFile(new ImageValidationPipe({ optional: true }))
-    profileImage?: Express.Multer.File,
+    profileImage?: Express.Multer.File | null,
   ): Promise<TeacherDetailDto> {
     return this.teachersService.updateTeacher(
       req.user.schoolId,
       id,
       updateTeacherDto,
-      profileImage,
+      updateTeacherDto.removeProfileImage ? null : profileImage,
     );
   }
 

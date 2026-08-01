@@ -1,5 +1,6 @@
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import {
+  IsBoolean,
   IsEmail,
   IsNotEmpty,
   IsOptional,
@@ -28,4 +29,9 @@ export class UpdateTeacherDto {
     message: 'Color must be in format #RRGGBB or #RGB.',
   })
   color?: string | null;
+
+  @IsOptional()
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  removeProfileImage?: boolean;
 }

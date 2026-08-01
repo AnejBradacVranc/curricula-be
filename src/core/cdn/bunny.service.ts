@@ -46,11 +46,39 @@ export class BunnyCDNService implements CDNService {
     fileName: string,
     file: Express.Multer.File,
   ): Promise<string> {
-    // Stable key so re-uploads overwrite the previous object for that entity.
-    // Fixed extension avoids orphans when the upload mime/type changes.
     const safeName = fileName.replace(/[^a-zA-Z0-9_-]/g, '');
     const path = `/${schoolId}/${folder}/${safeName}.jpg`;
     return this.uploadFile(path, file);
+  }
+
+  async removeFile(path: string): Promise<void> {
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+    try {
+      const uploaded = await BunnyStorageSDK.file.remove(
+        this.storageZone,
+        path,
+      );
+
+      if (!uploaded) {
+        throw new InternalServerErrorException(
+          'Bunny CDN rejected the file upload.',
+        );
+      }
+
+      return;
+    } catch (error) {
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+
+      this.logger.error(
+        `Failed to remove file from Bunny CDN at path "${normalizedPath}"`,
+        error instanceof Error ? error.stack : undefined,
+      );
+
+      throw new InternalServerErrorException('Failed to remove file from CDN.');
+    }
   }
 
   async uploadFile(path: string, file: Express.Multer.File): Promise<string> {
