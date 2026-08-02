@@ -16,7 +16,7 @@ export class ExportService {
 
     if (!teacher) {
       throw new NotFoundException('Teacher not found for this school');
-    }
+    }  
 
     return await this.pdfService.generateTeacherPDF(teacher);
   }

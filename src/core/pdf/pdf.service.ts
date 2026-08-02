@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { Teacher } from 'generated/prisma/client';
 import pdfMake from 'pdfmake';
 import type {
@@ -18,10 +23,11 @@ const HELVETICA_FONTS = {
 
 @Injectable()
 export class PDFService implements OnModuleInit {
+  private readonly logger = new Logger(PDFService.name);
+
   onModuleInit() {
     pdfMake.setFonts(HELVETICA_FONTS);
     pdfMake.setUrlAccessPolicy(() => false);
-    pdfMake.setLocalAccessPolicy(() => false);
   }
 
   async generateTeacherPDF(teacher: Teacher): Promise<Buffer> {
@@ -35,7 +41,20 @@ export class PDFService implements OnModuleInit {
   private async createBuffer(
     docDefinition: TDocumentDefinitions,
   ): Promise<Buffer> {
-    return await pdfMake.createPdf(docDefinition).getBuffer();
+    try {
+      return await pdfMake.createPdf(docDefinition).getBuffer();
+    } catch (error: any) {
+      if (error instanceof InternalServerErrorException) {
+        throw error;
+      }
+
+      this.logger.error(
+        `Failed to generate PDF buffer`,
+        error instanceof Error ? error.stack : undefined,
+      );
+
+      throw new InternalServerErrorException('Failed generate PDF export.');
+    }
   }
 
   private buildTeacherDocument(teacher: Teacher): TDocumentDefinitions {

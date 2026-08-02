@@ -12,7 +12,7 @@ import { ExportService } from './export.service';
 export class ExportController {
   constructor(private readonly exportService: ExportService) {}
 
-  @Get('teacher/:id')
+  @Get('teachers/:id')
   async exportTeacher(
     @Request() req: { user: AuthenticatedUser },
     @Param('id') id: number,
@@ -21,6 +21,7 @@ export class ExportController {
       req.user.schoolId,
       id,
     );
+
     return new StreamableFile(pdfBuffer);
   }
 }
