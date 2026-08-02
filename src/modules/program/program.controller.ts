@@ -21,7 +21,7 @@ export class ProgramsController {
   async getPrograms(
     @Request() req: { user: AuthenticatedUser },
   ): Promise<ProgramWithRelations[]> {
-    return await this.programsService.programsBySchool(req.user.schoolId);
+    return await this.programsService.programs(req.user.schoolId);
   }
 
   @Post('import')

@@ -59,7 +59,7 @@ export class ProgramsService {
     });
   }
 
-  async programsBySchool(schoolId: number): Promise<ProgramWithRelations[]> {
+  async programs(schoolId: number): Promise<ProgramWithRelations[]> {
     return this.prisma.program.findMany({
       where: { schoolId },
       include: programInclude,
