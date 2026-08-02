@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import * as BunnyStorageSDK from '@bunny.net/storage-sdk';
 import { CDNService } from './_cdn-service';
+import { randomUUID } from 'node:crypto';
 
 function bufferToReadableStream(buffer: Buffer): ReadableStream<Uint8Array> {
   return new ReadableStream({
@@ -47,7 +48,7 @@ export class BunnyCDNService implements CDNService {
     file: Express.Multer.File,
   ): Promise<string> {
     const safeName = fileName.replace(/[^a-zA-Z0-9_-]/g, '');
-    const path = `/${schoolId}/${folder}/${safeName}.jpg`;
+    const path = `/${schoolId}/${folder}/${safeName}-${randomUUID()}.jpg`;
     return this.uploadFile(path, file);
   }
 

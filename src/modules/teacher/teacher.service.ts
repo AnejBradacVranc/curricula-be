@@ -114,7 +114,7 @@ export class TeachersService {
         )
       : profileImage;
 
-    if (profileImageUrl === null && teacher.profileImage) {
+    if ((profileImage || profileImageUrl === null) && teacher.profileImage) {
       const storagePath = new URL(teacher.profileImage).pathname;
       await this.cdnService.removeFile(storagePath);
     }
