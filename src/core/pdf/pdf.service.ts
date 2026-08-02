@@ -4,6 +4,8 @@ import {
   Logger,
   OnModuleInit,
 } from '@nestjs/common';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 import { Teacher } from 'generated/prisma/client';
 import pdfMake from 'pdfmake';
 import type {
@@ -11,13 +13,21 @@ import type {
   TDocumentDefinitions,
   TableCell,
 } from 'pdfmake/interfaces';
+import { TeacherDetailDto } from 'src/modules/teacher/dto/teacher-detail.dto';
 
-const HELVETICA_FONTS = {
-  Helvetica: {
-    normal: 'Helvetica',
-    bold: 'Helvetica-Bold',
-    italics: 'Helvetica-Oblique',
-    bolditalics: 'Helvetica-BoldOblique',
+const nodeRequire = createRequire(__filename);
+const ROBOTO_DIR = join(
+  dirname(nodeRequire.resolve('pdfmake/package.json')),
+  'fonts',
+  'Roboto',
+);
+
+const FONTS = {
+  Roboto: {
+    normal: join(ROBOTO_DIR, 'Roboto-Regular.ttf'),
+    bold: join(ROBOTO_DIR, 'Roboto-Medium.ttf'),
+    italics: join(ROBOTO_DIR, 'Roboto-Italic.ttf'),
+    bolditalics: join(ROBOTO_DIR, 'Roboto-MediumItalic.ttf'),
   },
 };
 
@@ -26,11 +36,14 @@ export class PDFService implements OnModuleInit {
   private readonly logger = new Logger(PDFService.name);
 
   onModuleInit() {
-    pdfMake.setFonts(HELVETICA_FONTS);
+    pdfMake.setFonts(FONTS);
     pdfMake.setUrlAccessPolicy(() => false);
+    pdfMake.setLocalAccessPolicy((filePath) =>
+      filePath.startsWith(ROBOTO_DIR),
+    );
   }
 
-  async generateTeacherPDF(teacher: Teacher): Promise<Buffer> {
+  async generateTeacherPDF(teacher: TeacherDetailDto): Promise<Buffer> {
     return await this.createBuffer(this.buildTeacherDocument(teacher));
   }
 
@@ -57,14 +70,16 @@ export class PDFService implements OnModuleInit {
     }
   }
 
-  private buildTeacherDocument(teacher: Teacher): TDocumentDefinitions {
+  private buildTeacherDocument(
+    teacher: TeacherDetailDto,
+  ): TDocumentDefinitions {
     return {
       info: {
         title: `Teacher – ${teacher.name} ${teacher.surname}`,
         author: 'Curricula',
       },
       defaultStyle: {
-        font: 'Helvetica',
+        font: 'Roboto',
         fontSize: 11,
       },
       content: [
@@ -76,6 +91,8 @@ export class PDFService implements OnModuleInit {
         header: { fontSize: 18, bold: true },
         section: { fontSize: 13, bold: true, margin: [0, 12, 0, 6] },
         label: { bold: true },
+        muted: { fontSize: 9, color: '#666666' },
+        tableHeader: { bold: true, fillColor: '#eeeeee' },
       },
     };
   }
@@ -87,7 +104,7 @@ export class PDFService implements OnModuleInit {
         author: 'Curricula',
       },
       defaultStyle: {
-        font: 'Helvetica',
+        font: 'Roboto',
         fontSize: 10,
       },
       content: [
@@ -112,7 +129,7 @@ export class PDFService implements OnModuleInit {
     };
   }
 
-  private teacherDetailContent(teacher: Teacher): Content[] {
+  private teacherDetailContent(teacher: TeacherDetailDto): Content[] {
     return [
       { text: 'Profile', style: 'section' },
       {
@@ -134,7 +151,78 @@ export class PDFService implements OnModuleInit {
           `Total: ${this.formatHours(teacher.totalHours)}`,
         ],
       },
-      // TODO: assignments / additional activities when richer DTO is passed in
+      ...this.assignmentsContent(teacher),
+      ...this.additionalActivitiesContent(teacher),
+    ];
+  }
+
+  private assignmentsContent(teacher: TeacherDetailDto): Content[] {
+    const header: Content = {
+      text: `Assignments (${teacher.assignments.length})`,
+      style: 'section',
+    };
+
+    if (teacher.assignments.length === 0) {
+      return [header, { text: 'No subject assignments.', style: 'muted' }];
+    }
+
+    return [
+      header,
+      {
+        table: {
+          headerRows: 1,
+          widths: ['*', 'auto', 'auto', 'auto', 'auto'],
+          body: [
+            [
+              { text: 'Subject', style: 'tableHeader' },
+              { text: 'Category', style: 'tableHeader' },
+              { text: 'Year', style: 'tableHeader' },
+              { text: 'Class', style: 'tableHeader' },
+              { text: 'Hours/week', style: 'tableHeader' },
+            ],
+            ...teacher.assignments.map((assignment) => [
+              assignment.programSubject.subject.name,
+              assignment.programSubject.subject.category.name,
+              assignment.class.programYear.year.name,
+              assignment.class.label,
+              this.formatHours(assignment.programSubject.requiredHours),
+            ]),
+          ],
+        },
+        layout: 'lightHorizontalLines',
+      },
+    ];
+  }
+
+  private additionalActivitiesContent(teacher: TeacherDetailDto): Content[] {
+    const header: Content = {
+      text: `Additional activities (${teacher.additionalActivityAssignments.length})`,
+      style: 'section',
+    };
+
+    if (teacher.additionalActivityAssignments.length === 0) {
+      return [header, { text: 'No additional activities.', style: 'muted' }];
+    }
+
+    return [
+      header,
+      {
+        table: {
+          headerRows: 1,
+          widths: ['*', 'auto'],
+          body: [
+            [
+              { text: 'Activity', style: 'tableHeader' },
+              { text: 'Hours', style: 'tableHeader' },
+            ],
+            ...teacher.additionalActivityAssignments.map((assignment) => [
+              assignment.additionalActivity.name,
+              this.formatHours(assignment.hoursAmount),
+            ]),
+          ],
+        },
+        layout: 'lightHorizontalLines',
+      },
     ];
   }
 
@@ -160,7 +248,9 @@ export class PDFService implements OnModuleInit {
     ];
   }
 
-  private formatHours(value: Teacher['assignedHours']): string {
+  private formatHours(
+    value: Teacher['assignedHours'] | number | string,
+  ): string {
     return Number(value).toFixed(2);
   }
 }
