@@ -3,13 +3,14 @@ import {
   ExecutionContext,
   Injectable,
   NestInterceptor,
+  StreamableFile,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 
 const TIMESTAMP_KEYS = new Set(['createdAt', 'updatedAt']);
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     return false;
   }
   const proto = Object.getPrototypeOf(value) as object | null;
@@ -44,14 +45,20 @@ function omitTimestamps<T>(value: T): T {
 @Injectable()
 export class TransformInterceptor<T> implements NestInterceptor<
   T,
-  { data: T }
+  { data: T } | StreamableFile
 > {
   intercept(
     _context: ExecutionContext,
     next: CallHandler<T>,
-  ): Observable<{ data: T }> {
-    return next
-      .handle()
-      .pipe(map((data) => ({ data: omitTimestamps(data) })));
+  ): Observable<{ data: T } | StreamableFile> {
+    return next.handle().pipe(
+      map((data) => {
+        if (data instanceof StreamableFile) {
+          return data;
+        }
+
+        return { data: omitTimestamps(data) };
+      }),
+    );
   }
 }

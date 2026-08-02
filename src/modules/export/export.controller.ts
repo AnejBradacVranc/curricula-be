@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Header,
   Param,
   Request,
   StreamableFile,
@@ -13,6 +14,7 @@ export class ExportController {
   constructor(private readonly exportService: ExportService) {}
 
   @Get('teachers/:id')
+  @Header('Content-Type', 'application/pdf')
   async exportTeacher(
     @Request() req: { user: AuthenticatedUser },
     @Param('id') id: number,
@@ -22,6 +24,9 @@ export class ExportController {
       id,
     );
 
-    return new StreamableFile(pdfBuffer);
+    return new StreamableFile(pdfBuffer, {
+      type: 'application/pdf',
+      disposition: `attachment; filename="teacher-${id}.pdf"`,
+    });
   }
 }
