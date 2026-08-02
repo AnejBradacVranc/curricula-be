@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { PromptFactory } from './prompts/prompt.factory';
 

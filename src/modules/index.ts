@@ -5,6 +5,7 @@ export { AuthModule } from './auth/auth.module';
 export { CategoriesModule } from './category/category.module';
 export { ClassesModule } from './class/class.module';
 export { ExtractModule } from './extract/extract.module';
+export { ExportModule } from './export/export.module';
 export { ProgramSubjectsModule } from './program-subject/program-subject.module';
 export { ProgramYearsModule } from './program-year/program-year.module';
 export { ProgramsModule } from './program/program.module';

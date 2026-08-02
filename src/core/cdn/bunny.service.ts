@@ -4,10 +4,13 @@ import {
   Logger,
 } from '@nestjs/common';
 import * as BunnyStorageSDK from '@bunny.net/storage-sdk';
-import { CDNService } from './_cdn-service';
 import { randomUUID } from 'node:crypto';
+import { ReadableStream } from 'node:stream/web';
+import { CDNService } from './_cdn-service';
 
-function bufferToReadableStream(buffer: Buffer): ReadableStream<Uint8Array> {
+function bufferToReadableStream(
+  buffer: Buffer,
+): ReadableStream<Uint8Array> {
   return new ReadableStream({
     start(controller) {
       controller.enqueue(new Uint8Array(buffer));

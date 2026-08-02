@@ -12,6 +12,7 @@ import {
   CategoriesModule,
   ClassesModule,
   ExtractModule,
+  ExportModule,
   ProgramSubjectsModule,
   ProgramYearsModule,
   ProgramsModule,
@@ -42,6 +43,7 @@ import { CDNModule } from './core/cdn/cdn.module';
     AdditionalActivityAssignmentModule,
     ClassesModule,
     ExtractModule,
+    ExportModule,
     RouterModule.register([
       {
         path: 'schools',
@@ -98,6 +100,10 @@ import { CDNModule } from './core/cdn/cdn.module';
           {
             path: 'extract',
             module: ExtractModule,
+          },
+          {
+            path: 'export',
+            module: ExportModule,
           },
         ],
       },
