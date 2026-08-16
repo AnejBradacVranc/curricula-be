@@ -10,7 +10,7 @@ import {
 import { Program } from 'generated/prisma/client';
 import { CreateProgramDto } from './dto/create-program.dto';
 import { ImportProgramDto } from './dto/import-program.dto';
-import { ProgramsService, ProgramWithRelations } from './program.service';
+import { ProgramsService, ProgramLean, ProgramWithRelations } from './program.service';
 import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 
 @Controller()
@@ -20,7 +20,7 @@ export class ProgramsController {
   @Get()
   async getPrograms(
     @Request() req: { user: AuthenticatedUser },
-  ): Promise<ProgramWithRelations[]> {
+  ): Promise<ProgramLean[]> {
     return await this.programsService.programs(req.user.schoolId);
   }
 

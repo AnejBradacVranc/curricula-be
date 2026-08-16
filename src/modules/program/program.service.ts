@@ -41,8 +41,28 @@ const programInclude = {
   },
 } as const satisfies Prisma.ProgramInclude;
 
+const programListSelect = {
+  id: true,
+  name: true,
+  createdAt: true,
+  updatedAt: true,
+  programYears: {
+    omit: { programId: true, yearId: true },
+  },
+  programSubjects: {
+    omit: { programId: true, subjectId: true, yearId: true },
+    include: {
+      subject: { omit: { schoolId: true, categoryId: true, id: true } },
+    },
+  },
+} as const satisfies Prisma.ProgramSelect;
+
 export type ProgramWithRelations = Prisma.ProgramGetPayload<{
   include: typeof programInclude;
+}>;
+
+export type ProgramLean = Prisma.ProgramGetPayload<{
+  select: typeof programListSelect;
 }>;
 
 @Injectable()
@@ -59,10 +79,10 @@ export class ProgramsService {
     });
   }
 
-  async programs(schoolId: number): Promise<ProgramWithRelations[]> {
+  async programs(schoolId: number): Promise<ProgramLean[]> {
     return this.prisma.program.findMany({
       where: { schoolId },
-      include: programInclude,
+      select: programListSelect,
     });
   }
 
