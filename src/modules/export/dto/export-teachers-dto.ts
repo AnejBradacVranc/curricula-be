@@ -1,10 +1,8 @@
-import { Type } from 'class-transformer';
-import { ArrayNotEmpty, IsArray, IsInt } from 'class-validator';
+import { IsArray, IsInt, IsOptional } from 'class-validator';
 
-export class ExportTeachersQueryDto {
+export class ExportTeachersDto {
+  @IsOptional()
   @IsArray()
-  @ArrayNotEmpty()
   @IsInt({ each: true })
-  @Type(() => Number)
-  ids: number[];
+  ids?: number[];
 }

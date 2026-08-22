@@ -1,13 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PDFService } from 'src/core/pdf/pdf.service';
 import { PrismaService } from 'src/core/prisma/prisma.service';
-import {
-  TeacherDetailDto,
-  teacherDetailSelect,
-} from '../teacher/dto/teacher-detail.dto';
-import { Content, TableCell, TDocumentDefinitions } from 'pdfmake/interfaces';
-import { Teacher } from 'generated/prisma/client';
-import { formatHours } from 'src/common/utils/number.util';
+import { teacherDetailSelect } from '../teacher/dto/teacher-detail.dto';
 import { TeacherPdfBuilder } from './builders/teacher-pdf.builder';
 
 @Injectable()
@@ -35,18 +29,21 @@ export class ExportService {
 
   async exportTeachers(
     schoolId: number,
-    teacherIds: number[],
+    teacherIds?: number[],
   ): Promise<Buffer> {
+    const hasSelection = teacherIds && teacherIds.length > 0;
+
     const teachers = await this.prisma.teacher.findMany({
-      where: { id: { in: teacherIds }, schoolId },
+      where: hasSelection ? { id: { in: teacherIds }, schoolId } : { schoolId },
+      orderBy: [{ surname: 'asc' }, { name: 'asc' }],
     });
 
-    if (teachers.length !== teacherIds.length) {
+    if (hasSelection && teachers.length !== teacherIds!.length) {
       throw new NotFoundException('Not all provided teachers could be found');
     }
 
-    if (!teachers) {
-      throw new NotFoundException('Teachers not found for this school');
+    if (teachers.length === 0) {
+      throw new NotFoundException('No teachers found for this school');
     }
 
     return await this.pdfService.createBuffer(

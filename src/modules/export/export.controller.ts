@@ -4,12 +4,13 @@ import {
   Get,
   Header,
   Param,
+  Post,
   Request,
   StreamableFile,
 } from '@nestjs/common';
 import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
 import { ExportService } from './export.service';
-import { ExportTeachersQueryDto } from './dto/export-teachers-dto';
+import { ExportTeachersDto } from './dto/export-teachers-dto';
 
 @Controller()
 export class ExportController {
@@ -32,11 +33,11 @@ export class ExportController {
     });
   }
 
-  @Get('teachers')
+  @Post('teachers')
   @Header('Content-Type', 'application/pdf')
   async exportTeachers(
     @Request() req: { user: AuthenticatedUser },
-    @Body() { ids }: ExportTeachersQueryDto,
+    @Body() { ids }: ExportTeachersDto,
   ): Promise<StreamableFile> {
     const pdfBuffer = await this.exportService.exportTeachers(
       req.user.schoolId,
