@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
-export abstract class AiProvider {
-  abstract generateResponse<T>(
+export interface AiProvider {
+  generateResponse<T>(
     prompt: string,
     schema: z.ZodType<T>,
     systemPrompt: string,
