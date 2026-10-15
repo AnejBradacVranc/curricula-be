@@ -7,9 +7,11 @@ import { Prisma, ProgramSubject } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import {
   applyTeacherHourDeltas,
+  teacherAssignmentHours,
   teacherAssignmentHoursDelta,
 } from '../teacher/teacher-hours.util';
 import { CreateProgramSubjectDto } from './dto/create-program-subject.dto';
+import { DeleteProgramSubjectDto } from './dto/delete-program-subject.dto';
 import { UpdateProgramSubjectDto } from './dto/update-program-subject.dto';
 
 const programSubjectInclude = {
@@ -154,6 +156,57 @@ export class ProgramSubjectsService {
         },
         data: { requiredHours: newRequiredHours },
         include: programSubjectInclude,
+      });
+    });
+  }
+
+  async deleteProgramSubject(
+    schoolId: number,
+    data: DeleteProgramSubjectDto,
+  ): Promise<void> {
+    const { programId, subjectId, yearId } = data;
+
+    const programSubject = await this.prisma.programSubject.findFirst({
+      where: {
+        programId,
+        subjectId,
+        yearId,
+        program: { schoolId },
+      },
+      include: { programYear: true },
+    });
+
+    if (!programSubject) {
+      throw new NotFoundException('Program subject not found');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      const assignments = await tx.classSubjectAssignment.findMany({
+        where: { programId, subjectId, yearId },
+      });
+
+      const deltaByTeacher = new Map<number, Prisma.Decimal>();
+      const hours = teacherAssignmentHours(
+        programSubject.requiredHours,
+        programSubject.programYear.numWeeks,
+      );
+
+      for (const assignment of assignments) {
+        const prev =
+          deltaByTeacher.get(assignment.teacherId) ?? new Prisma.Decimal(0);
+        deltaByTeacher.set(assignment.teacherId, prev.sub(hours));
+      }
+
+      await applyTeacherHourDeltas(tx, schoolId, deltaByTeacher);
+
+      await tx.classSubjectAssignment.deleteMany({
+        where: { programId, subjectId, yearId },
+      });
+
+      await tx.programSubject.delete({
+        where: {
+          programId_subjectId_yearId: { programId, subjectId, yearId },
+        },
       });
     });
   }

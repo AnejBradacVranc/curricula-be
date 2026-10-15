@@ -7,6 +7,6 @@ export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<Category[]> {
-    return this.prisma.category.findMany({ orderBy: { id: 'asc' } });
+    return this.prisma.category.findMany({ orderBy: { name: 'asc' } });
   }
 }

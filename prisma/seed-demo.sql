@@ -470,11 +470,11 @@ VALUES
   (2, 18, 1, 2.50, NOW(), NOW());
 
 -- Teachers with no class/activity assignments (assignedHours / totalHours = 0)
-INSERT INTO "Teacher" (id, name, surname, email, "schoolId", "assignedHours", "additionalActivityHours", "totalHours", "createdAt", "updatedAt")
+INSERT INTO "Teacher" (id, name, surname, email, "schoolId", "assignedHours", "additionalActivityHours", "totalHours", "profileImage", "createdAt", "updatedAt")
 VALUES
-  (1, 'Majda', 'Drobnič', 'majda.drobnich@gradbena.si', 3, 0, 0, 0, NOW(), NOW()),
-  (2, 'Riko', 'Vranc', 'riko.vranc@gradbena.si', 3, 0, 0, 0, NOW(), NOW()),
-  (3, 'Goran', 'Perhavec', 'goran.perhavec@gradbena.si', 3, 0, 0, 0, NOW(), NOW());
+  (1, 'Majda', 'Drobnič', 'majda.drobnich@gradbena.si', 3, 0, 0, 0, NULL, NOW(), NOW()),
+  (2, 'Riko', 'Vranc', 'riko.vranc@gradbena.si', 3, 0, 0, 0, NULL, NOW(), NOW()),
+  (3, 'Goran', 'Perhavec', 'goran.perhavec@gradbena.si', 3, 0, 0, 0, NULL, NOW(), NOW());
 
 SELECT setval(pg_get_serial_sequence('"Teacher"', 'id'), (SELECT MAX(id) FROM "Teacher"));
 

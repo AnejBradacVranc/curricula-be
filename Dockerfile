@@ -37,6 +37,7 @@ ENV NODE_ENV=production
 COPY --from=build /usr/src/app/node_modules ./node_modules
 COPY --from=build /usr/src/app/dist ./dist
 COPY --from=build /usr/src/app/prisma ./prisma
+COPY --from=build /usr/src/app/prompts ./prompts
 COPY package*.json ./
 
 CMD ["npm", "run", "start:prod"]

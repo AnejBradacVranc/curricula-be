@@ -10,6 +10,7 @@ export const teacherDetailSelect = {
   assignedHours: true,
   additionalActivityHours: true,
   totalHours: true,
+  profileImage: true,
   assignments: {
     select: {
       class: {

@@ -29,7 +29,7 @@ export class CreateTeacherDto {
   @IsOptional()
   @IsString()
   @Matches(/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/, {
-    message: 'Color needs to be in format #RRGGBB ali #RGB.',
+    message: 'Color must be in format #RRGGBB or #RGB.',
   })
   color?: string;
 }

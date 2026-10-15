@@ -7,6 +7,6 @@ export class YearsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<Year[]> {
-    return this.prisma.year.findMany({ orderBy: { id: 'asc' } });
+    return this.prisma.year.findMany({ orderBy: { name: 'asc' } });
   }
 }
