@@ -21,7 +21,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c "npx prisma db push && npm run start:dev"
+    command: sh -c "npx prisma migrate deploy && npm run start:dev"
     restart: unless-stopped
 
   db:
