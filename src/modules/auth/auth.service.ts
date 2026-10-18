@@ -1,10 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import * as bcrypt from 'bcrypt';
 import { User } from 'generated/prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { RegisterUserDto } from './dto/register.dto';
+import { createHash } from 'crypto';
 
 const saltOrRounds = 10;
 
@@ -40,15 +45,55 @@ export class AuthService {
   }
 
   async registerUser(data: RegisterUserDto): Promise<UserNoPassword> {
-    const { password, schoolId, ...rest } = data;
-    const hash = await this.hashPswd(password);
+    const { password, inviteToken, email, ...rest } = data;
 
-    const user = await this.prisma.user.create({
-      data: {
-        password: hash,
-        ...rest,
-        school: { connect: { id: schoolId } },
-      },
+    const inviteTokenHash = createHash('sha256')
+      .update(Buffer.from(inviteToken, 'hex'))
+      .digest('hex');
+
+    const pswdHash = await this.hashPswd(password);
+
+    const user = await this.prisma.$transaction(async (tx) => {
+      const invite = await tx.invite.findUnique({
+        where: { token: inviteTokenHash },
+      });
+
+      if (!invite) {
+        throw new NotFoundException('Invalid invite token');
+      }
+
+      if (invite.usedAt) {
+        throw new UnauthorizedException('Invite has already been used');
+      }
+
+      if (invite.email !== email) {
+        throw new UnauthorizedException(
+          'Invite does not belong to given email',
+        );
+      }
+
+      if (Date.now() > invite.expiry.getTime()) {
+        throw new UnauthorizedException('Invite token expired');
+      }
+
+      const affected = await tx.invite.updateMany({
+        where: { id: invite.id, usedAt: null },
+        data: { usedAt: new Date() },
+      });
+
+      if (affected.count !== 1) {
+        throw new UnauthorizedException('Invite has already been used');
+      }
+
+      return tx.user.create({
+        data: {
+          password: pswdHash,
+          email,
+          role: invite.role,
+          ...rest,
+          school: { connect: { id: invite.schoolId } },
+        },
+      });
     });
 
     const { password: _, ...safeUser } = user;
