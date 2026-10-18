@@ -42,6 +42,7 @@ model School {
   programs Program[]
   subjects Subject[]
   teachers Teacher[]
+  invites Invite[]
   logo String?
   tel      String?
   email    String?
@@ -153,6 +154,20 @@ model ProgramSubject {
   yearId        Int
 
   @@id([programId, subjectId, yearId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Invite {
+  id       Int      @id @default(autoincrement())
+  school   School   @relation(fields: [schoolId], references: [id])
+  token    String @unique
+  email    String
+  schoolId Int
+  role     Role
+  expiry   DateTime
+  usedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
