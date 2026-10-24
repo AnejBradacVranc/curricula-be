@@ -1,4 +1,4 @@
-import { Type, Transform } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsEmail,
@@ -18,9 +18,10 @@ export class UpdateTeacherDto {
   @IsNotEmpty()
   surname: string;
 
+  @IsOptional()
+  @ValidateIf((_, value) => value != null && value !== '')
   @IsEmail()
-  @IsNotEmpty()
-  email: string;
+  email?: string | null;
 
   @IsOptional()
   @ValidateIf((_, value) => value != null && value !== '')

@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
   Matches,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateTeacherDto {
@@ -17,9 +18,10 @@ export class CreateTeacherDto {
   @IsNotEmpty()
   surname: string;
 
+  @IsOptional()
+  @ValidateIf((_, value) => value != null && value !== '')
   @IsEmail()
-  @IsNotEmpty()
-  email: string;
+  email?: string | null;
 
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 4 })

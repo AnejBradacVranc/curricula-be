@@ -44,7 +44,7 @@ export class ExtractService {
     return result.teachers.map((teacher) => ({
       name: teacher.name.trim(),
       surname: teacher.surname.trim(),
-      email: teacher.email.trim().toLowerCase(),
+      email: teacher.email?.trim().toLowerCase() || undefined,
     }));
   }
 

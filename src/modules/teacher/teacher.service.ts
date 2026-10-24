@@ -10,6 +10,11 @@ import {
 } from './dto/teacher-detail.dto';
 import { UpdateTeacherDto } from './dto/update-teacher.dto';
 
+function normalizeOptionalEmail(email?: string | null): string | null {
+  const trimmed = email?.trim().toLowerCase();
+  return trimmed ? trimmed : null;
+}
+
 @Injectable()
 export class TeachersService {
   constructor(
@@ -41,10 +46,15 @@ export class TeachersService {
   ): Promise<Teacher> {
     const assignedHours = new Prisma.Decimal(data.assignedHours);
 
+    const email = normalizeOptionalEmail(data.email);
+
     // Create first so we have a stable teacher id for the CDN object key.
     const teacher = await this.prisma.teacher.create({
       data: {
-        ...data,
+        name: data.name.trim(),
+        surname: data.surname.trim(),
+        email,
+        color: data.color,
         assignedHours,
         additionalActivityHours: 0,
         totalHours: assignedHours,
@@ -80,7 +90,7 @@ export class TeachersService {
         return {
           name: teacher.name.trim(),
           surname: teacher.surname.trim(),
-          email: teacher.email.trim().toLowerCase(),
+          email: normalizeOptionalEmail(teacher.email),
           color: teacher.color,
           schoolId,
           assignedHours,
@@ -129,7 +139,7 @@ export class TeachersService {
       data: {
         name: data.name.trim(),
         surname: data.surname.trim(),
-        email: data.email.trim().toLowerCase(),
+        email: normalizeOptionalEmail(data.email),
         color,
         ...(profileImageUrl !== undefined
           ? { profileImage: profileImageUrl }

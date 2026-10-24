@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const extractTeacherSchema = z.object({
   name: z.string().min(1),
   surname: z.string().min(1),
-  email: z.string().email(),
+  email: z.email().optional(),
 });
 
 export const extractTeachersSchema = z.object({

@@ -78,7 +78,10 @@ export class TeacherPdfBuilder implements PDFBuilder<
         columnGap: 16,
       },
       {
-        text: [{ text: 'Email: ', style: 'label' }, teacher.email],
+        text: [
+          { text: 'Email: ', style: 'label' },
+          teacher.email ?? '—',
+        ],
         margin: [0, 4, 0, 0],
       },
       { text: 'Hours', style: 'section' },
@@ -179,7 +182,7 @@ export class TeacherPdfBuilder implements PDFBuilder<
     return [
       teacher.name,
       teacher.surname,
-      teacher.email,
+      teacher.email ?? '—',
       formatHours(teacher.assignedHours),
       formatHours(teacher.additionalActivityHours),
       formatHours(teacher.totalHours),

@@ -191,7 +191,7 @@ model Teacher {
   school          School           @relation(fields: [schoolId], references: [id])  
   name            String
   surname         String
-  email           String           @unique
+  email           String?          @unique
   color String?
   schoolId        Int  
   assignedHours   Decimal          @default(0) @db.Decimal(8, 4)

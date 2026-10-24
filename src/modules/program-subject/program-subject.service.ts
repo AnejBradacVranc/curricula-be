@@ -129,7 +129,7 @@ export class ProgramSubjectsService {
       });
 
       const deltaByTeacher = new Map<number, Prisma.Decimal>();
-      const numWeeks = programSubject.programYear.numWeeks;
+      const numWeeks = programSubject.programYear.numWeeks;      
 
       for (const assignment of assignments) {
         const delta = teacherAssignmentHoursDelta(
