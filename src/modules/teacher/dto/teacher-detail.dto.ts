@@ -31,7 +31,7 @@ export const teacherDetailSelect = {
             select: {
               name: true,
               abbrevation: true,
-              category: { select: { name: true } },
+              category: { select: { id: true, name: true } },
             },
           },
         },
