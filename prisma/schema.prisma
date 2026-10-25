@@ -68,7 +68,7 @@ model User {
 
 model Year {
   id           Int           @id @default(autoincrement())
-  name         String        @unique
+  year         Int           @unique // 1, 2, 3, 4… → displayed as "X. letnik" on FE
   programYears ProgramYear[]
 
   createdAt DateTime @default(now())

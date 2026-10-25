@@ -89,14 +89,14 @@ export class ExtractService {
     const subjectByName = new Map(
       subjects.map((subject) => [this.normalize(subject.name), subject]),
     );
-    const yearByName = new Map(
-      years.map((year) => [this.normalize(year.name), year]),
-    );
+    const yearByNumber = new Map(years.map((year) => [year.year, year]));
 
     const yearsResolved: ResolvedExtractProgramYear[] = extracted.years.map(
       (year) => {
         const yearName = year.yearName.trim();
-        const matchedYear = yearByName.get(this.normalize(yearName));
+        const yearNumber = this.parseYearNumber(yearName);
+        const matchedYear =
+          yearNumber != null ? (yearByNumber.get(yearNumber) ?? null) : null;
 
         const subjectsResolved: ResolvedExtractProgramSubject[] =
           year.subjects.map((subject) => {
@@ -133,5 +133,15 @@ export class ExtractService {
 
   private normalize(value: string): string {
     return value.trim().toLowerCase();
+  }
+
+  private parseYearNumber(yearName: string): number | null {
+    const match = yearName.match(/(\d+)/);
+    if (!match) {
+      return null;
+    }
+
+    const value = Number(match[1]);
+    return Number.isInteger(value) ? value : null;
   }
 }

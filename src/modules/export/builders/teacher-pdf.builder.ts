@@ -124,7 +124,7 @@ export class TeacherPdfBuilder implements PDFBuilder<
             ...teacher.assignments.map((assignment) => [
               assignment.programSubject.subject.name,
               assignment.programSubject.subject.category.name,
-              assignment.class.programYear.year.name,
+              `${assignment.class.programYear.year.year}. letnik`,
               assignment.class.label,
               formatHours(assignment.programSubject.requiredHours),
             ]),

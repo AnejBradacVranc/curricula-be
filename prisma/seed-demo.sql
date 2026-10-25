@@ -3,13 +3,13 @@
 
 BEGIN;
 
-INSERT INTO "Year" (id, name, "createdAt", "updatedAt")
+INSERT INTO "Year" (id, year, "createdAt", "updatedAt")
 VALUES
-  (1, '1. letnik', NOW(), NOW()),
-  (2, '2. letnik', NOW(), NOW()),
-  (3, '3. letnik', NOW(), NOW()),
-  (4, '4. letnik', NOW(), NOW())
-ON CONFLICT (name) DO UPDATE SET "updatedAt" = NOW();
+  (1, 1, NOW(), NOW()),
+  (2, 2, NOW(), NOW()),
+  (3, 3, NOW(), NOW()),
+  (4, 4, NOW(), NOW())
+ON CONFLICT (year) DO UPDATE SET "updatedAt" = NOW();
 
 SELECT setval(pg_get_serial_sequence('"Year"', 'id'), (SELECT MAX(id) FROM "Year"));
 

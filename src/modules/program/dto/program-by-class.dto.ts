@@ -1,6 +1,6 @@
 export type YearSummaryDto = {
   id: number;
-  name: string;
+  year: number;
 };
 
 export type SubjectSummaryDto = {

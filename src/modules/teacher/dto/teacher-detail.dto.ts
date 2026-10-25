@@ -19,7 +19,7 @@ export const teacherDetailSelect = {
           programYear: {
             select: {
               numWeeks: true,
-              year: { select: { name: true } },
+              year: { select: { id: true, year: true } },
             },
           },
         },
@@ -27,6 +27,12 @@ export const teacherDetailSelect = {
       programSubject: {
         select: {
           requiredHours: true,
+          program: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
           subject: {
             select: {
               name: true,
