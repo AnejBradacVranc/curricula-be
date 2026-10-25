@@ -7,7 +7,7 @@ import { Prisma, ProgramSubject } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import {
   applyTeacherHourDeltas,
-  teacherAssignmentHours,
+  calcTotalHours,
   teacherAssignmentHoursDelta,
 } from '../teacher/teacher-hours.util';
 import { CreateProgramSubjectDto } from './dto/create-program-subject.dto';
@@ -129,7 +129,7 @@ export class ProgramSubjectsService {
       });
 
       const deltaByTeacher = new Map<number, Prisma.Decimal>();
-      const numWeeks = programSubject.programYear.numWeeks;      
+      const numWeeks = programSubject.programYear.numWeeks;
 
       for (const assignment of assignments) {
         const delta = teacherAssignmentHoursDelta(
@@ -186,7 +186,7 @@ export class ProgramSubjectsService {
       });
 
       const deltaByTeacher = new Map<number, Prisma.Decimal>();
-      const hours = teacherAssignmentHours(
+      const hours = calcTotalHours(
         programSubject.requiredHours,
         programSubject.programYear.numWeeks,
       );

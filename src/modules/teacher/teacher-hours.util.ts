@@ -16,7 +16,7 @@ type TeacherHoursClient = {
   };
 };
 
-export function teacherAssignmentHours(
+export function calcTotalHours(
   requiredHours: Prisma.Decimal,
   numWeeks: number,
 ): Prisma.Decimal {
@@ -29,8 +29,8 @@ export function teacherAssignmentHoursDelta(
   oldNumWeeks: number,
   newNumWeeks: number,
 ): Prisma.Decimal {
-  return teacherAssignmentHours(newRequiredHours, newNumWeeks).sub(
-    teacherAssignmentHours(oldRequiredHours, oldNumWeeks),
+  return calcTotalHours(newRequiredHours, newNumWeeks).sub(
+    calcTotalHours(oldRequiredHours, oldNumWeeks),
   );
 }
 

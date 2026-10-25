@@ -9,7 +9,7 @@ import { CreateProgramDto } from './dto/create-program.dto';
 import { ImportProgramDto } from './dto/import-program.dto';
 import {
   applyTeacherHourDeltas,
-  teacherAssignmentHours,
+  calcTotalHours,
 } from '../teacher/teacher-hours.util';
 
 const programInclude = {
@@ -106,7 +106,7 @@ export class ProgramsService {
       const deltaByTeacher = new Map<number, Prisma.Decimal>();
 
       for (const a of assignments) {
-        const hours = teacherAssignmentHours(
+        const hours = calcTotalHours(
           a.programSubject.requiredHours,
           a.programSubject.programYear.numWeeks,
         );

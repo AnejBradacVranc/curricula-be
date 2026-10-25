@@ -5,7 +5,7 @@ import { CreateClassDto } from './dto/create-class.dto';
 import { DeleteClassDto } from './dto/delete-class.dto';
 import {
   applyTeacherHourDeltas,
-  teacherAssignmentHours,
+  calcTotalHours,
 } from '../teacher/teacher-hours.util';
 
 @Injectable()
@@ -60,7 +60,7 @@ export class ClassesService {
 
       const deltaByTeacher = new Map<number, Prisma.Decimal>();
       for (const a of assignments) {
-        const hours = teacherAssignmentHours(
+        const hours = calcTotalHours(
           a.programSubject.requiredHours,
           a.programSubject.programYear.numWeeks,
         );

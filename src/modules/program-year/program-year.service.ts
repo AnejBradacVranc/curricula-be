@@ -4,14 +4,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma } from 'generated/prisma/client';
+import { Prisma, ProgramYear } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import {
   applyTeacherHourDeltas,
+  calcTotalHours,
   teacherAssignmentHoursDelta,
 } from '../teacher/teacher-hours.util';
 import { CreateProgramYearDto } from './dto/create-program-year.dto';
 import { UpdateProgramYearDto } from './dto/update-program-year.dto';
+import { DeleteProgramYearDto } from './dto/delete-program-year.dto';
 
 const programYearInclude = {
   year: true,
@@ -64,30 +66,75 @@ export class ProgramYearsService {
     });
   }
 
+  async deleteProgramYear(
+    schoolId: number,
+    data: DeleteProgramYearDto,
+  ): Promise<ProgramYear> {
+    const { yearId, programId } = data;
+
+    const programYear = await this.prisma.programYear.findUnique({
+      where: { programId_yearId: { programId, yearId } },
+      include: { program: true },
+    });
+
+    if (!programYear || programYear.program.schoolId !== schoolId) {
+      throw new NotFoundException('Program year not found');
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const assignments = await tx.classSubjectAssignment.findMany({
+        where: { programId, yearId },
+        include: { programSubject: true },
+      });
+
+      const deltaByTeacher = new Map<number, Prisma.Decimal>();
+
+      for (const assignment of assignments) {
+        const hours = calcTotalHours(
+          assignment.programSubject.requiredHours,
+          programYear.numWeeks,
+        );
+
+        const prev =
+          deltaByTeacher.get(assignment.teacherId) ?? new Prisma.Decimal(0);
+        deltaByTeacher.set(assignment.teacherId, prev.sub(hours));
+      }
+
+      await applyTeacherHourDeltas(tx, schoolId, deltaByTeacher);
+
+      await tx.classSubjectAssignment.deleteMany({
+        where: { programId, yearId },
+      });
+      await tx.programSubject.deleteMany({
+        where: { programId, yearId },
+      });
+      await tx.class.deleteMany({
+        where: { programId, yearId },
+      });
+
+      return tx.programYear.delete({
+        where: { programId_yearId: { programId, yearId } },
+      });
+    });
+  }
+
   async updateProgramYear(
     schoolId: number,
     data: UpdateProgramYearDto,
   ): Promise<ProgramYearWithRelations> {
     const { programId, yearId, numWeeks } = data;
 
-    const program = await this.prisma.program.findUnique({
-      where: { id: programId },
-    });
-
-    if (!program || program.schoolId !== schoolId) {
-      throw new NotFoundException('Program not found');
-    }
-
     const programYear = await this.prisma.programYear.findUnique({
       where: { programId_yearId: { programId, yearId } },
+      include: { program: true },
     });
 
     if (!programYear) {
       throw new NotFoundException('Program year not found');
     }
 
-    if (numWeeks < 1) {
-      throw new BadRequestException('Number of weeks must be at least 1');
+    if (programYear.program.schoolId !== schoolId) {
+      throw new NotFoundException('Program does not belong to this school');
     }
 
     const oldNumWeeks = programYear.numWeeks;

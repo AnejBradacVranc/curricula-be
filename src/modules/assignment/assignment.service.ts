@@ -7,7 +7,7 @@ import { Prisma } from 'generated/prisma/client';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import {
   syncTeacherTotalHours,
-  teacherAssignmentHours,
+  calcTotalHours,
 } from '../teacher/teacher-hours.util';
 import { CreateAssignmentDto } from './dto/create-assignment.dto';
 import { DeleteAssignmentDto } from './dto/delete-assignment.dto';
@@ -82,7 +82,7 @@ export class AssignmentsService {
       throw new NotFoundException('Class not found for this program and year');
     }
 
-    const amount = teacherAssignmentHours(
+    const amount = calcTotalHours(
       programSubject.requiredHours,
       programSubject.programYear.numWeeks,
     );
@@ -105,7 +105,7 @@ export class AssignmentsService {
 
     return this.prisma.$transaction(async (tx) => {
       if (existing) {
-        const previousAmount = teacherAssignmentHours(
+        const previousAmount = calcTotalHours(
           programSubject.requiredHours,
           programSubject.programYear.numWeeks,
         );
@@ -172,7 +172,7 @@ export class AssignmentsService {
       throw new NotFoundException('Assignment not found for this class');
     }
 
-    const amount = teacherAssignmentHours(
+    const amount = calcTotalHours(
       assignment.programSubject.requiredHours,
       assignment.programSubject.programYear.numWeeks,
     );

@@ -4,6 +4,7 @@ import { IsInt, Min } from 'class-validator';
 export class UpdateProgramYearDto {
   @Type(() => Number)
   @IsInt()
+  @Min(1)
   programId: number;
 
   @Type(() => Number)

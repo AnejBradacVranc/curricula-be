@@ -1,4 +1,4 @@
-import { Body, Controller, Patch, Post, Request } from '@nestjs/common';
+import { Body, Controller, Delete, Patch, Post, Request } from '@nestjs/common';
 import { CreateProgramYearDto } from './dto/create-program-year.dto';
 import { UpdateProgramYearDto } from './dto/update-program-year.dto';
 import {
@@ -6,6 +6,8 @@ import {
   ProgramYearWithRelations,
 } from './program-year.service';
 import { AuthenticatedUser } from '../auth/strategies/jwt.strategy';
+import { DeleteProgramYearDto } from './dto/delete-program-year.dto';
+import { ProgramYear } from 'generated/prisma/client';
 
 @Controller()
 export class ProgramYearsController {
@@ -30,6 +32,17 @@ export class ProgramYearsController {
     return this.programYearsService.updateProgramYear(
       req.user.schoolId,
       updateProgramYearDto,
+    );
+  }
+
+  @Delete()
+  async deleteProgramYear(
+    @Request() req: { user: AuthenticatedUser },
+    @Body() deleteProgramYearDto: DeleteProgramYearDto,
+  ): Promise<ProgramYear> {
+    return this.programYearsService.deleteProgramYear(
+      req.user.schoolId,
+      deleteProgramYearDto,
     );
   }
 }
